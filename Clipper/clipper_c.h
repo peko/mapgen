@@ -2,11 +2,11 @@
 
 #include "kvec.h"
 
+typedef struct {uint64_t x, y;} point_t;
+typedef kvec_type(point_t) path_t;
+typedef kvec_type(path_t) paths_t;
+
 extern "C" clip(
-    uint64_t* subj, 
-    size_t subj_cnt, 
-    uint64_t* clip
-    size_t clip_cnt,
-    // output
-    uint64_t** result,
-    size_t* result_cnt);
+    paths_t* subj,
+    paths_t* clip,
+    paths_t* result);
