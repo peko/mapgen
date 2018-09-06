@@ -27,6 +27,11 @@ add_executable(clipper_test
 )
 target_link_libraries(clipper_test clipper)
 
+add_executable(clipper_c_test
+    Clipper/clipper_c_test.c
+)
+target_link_libraries(clipper_c_test clipper)
+
  
 add_executable(mapgen
     src/mapgen.c
