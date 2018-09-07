@@ -52,7 +52,7 @@ worldNew(int ants_count, int food_count) {
         cpShapeSetCollisionType(shape, WALL);
     }
     
-    for(int i=0; i<40; i++) { 
+    for(int i=0; i<80; i++) { 
         cpBody* body = createRoom(world);
         
         // avoiding self ray-query by temporary disabling collision 
@@ -65,7 +65,7 @@ worldNew(int ants_count, int food_count) {
         if(nearestInfo.shape) {
             cpVect* p = &nearestInfo.shape->body->p;
             cpConstraint* constr = cpDampedSpringNew(body, nearestInfo.shape->body, cpv(0,0), cpv(-0,0), 50.0f, 5.0f, 0.3f);
-            //cpConstraint* constr =  cpPivotJointNew(body, nearestInfo.shape->body, cpvadd(body->p, cpv(100,100)));
+            //cpConstraint* constr =  cpPivotJointNew(body, nearestInfo.shape->body, cpvmult(cpvadd(body->p, *p), 0.5));
             cpSpaceAddConstraint(w_space, constr);
         }
         shape->filter = f;
