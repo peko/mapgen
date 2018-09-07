@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include <string.h>
 #include <inttypes.h>
 
@@ -26,7 +28,6 @@ extern "C" void clipp_kpaths(
     clipper.AddPaths(subj, ptSubject);
     clipper.AddPaths(clip, ptClip);
     clipper.Execute(clip_type, result, fill_rule);
-
     paths_to_kpaths(result, kresult);
 }
 
@@ -49,8 +50,9 @@ static void paths_to_kpaths(Paths& paths, kpaths_t* kpaths) {
     if(kpaths->n != 0 || kpaths->a !=0) kpaths_free(kpaths);
     for(size_t i=0; i<paths.size(); i++) {
         Path& path = paths[i];
-        kpath_t* kpath = kpath_new();
+        kpath_t* kpath = kpaths_add_new_path(kpaths);
         kv_resize(kpoint_t, *kpath, path.size());
+        kpath->n = path.size();
         memcpy(kpath->a, path.data(), sizeof(kpoint_t)*(kpath->n));
     }
 }
@@ -64,13 +66,14 @@ kpath_t* kpath_new() {
 
 void kpath_free(kpath_t* kpath) {
     free(kpath->a);
+    *kpath = (kpath_t) {0,0,0};
 }
 
 void kpath_add_point(kpath_t* kpath, kpoint_t* kpoint) {
     kv_push(kpoint_t, *kpath, *kpoint);
 }
 
-void kpath_print(kpath_t* kpath) { 
+void kpath_print(kpath_t* kpath) {
     for(size_t i=0; i<kpath->n; i++) {
         printf("\t%d: {%" PRId64 ",%" PRId64 "}\n", i, kpath->a[i].x, kpath->a[i].y);
     }
@@ -93,6 +96,11 @@ void kpaths_free(kpaths_t* kpaths) {
 
 void kpaths_add_path(kpaths_t* kpaths, kpath_t* kpath) {
     kv_push(kpath_t, *kpaths, *kpath);
+}
+
+kpath_t* kpaths_add_new_path(kpaths_t* kpaths) {
+    kv_push(kpath_t, *kpaths, ((kpath_t){0,0,0}));
+    return &kpaths->a[kpaths->n-1];
 }
 
 void kpaths_print(kpaths_t* kpaths) {

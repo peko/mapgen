@@ -22,6 +22,7 @@ extern "C" {
     kpaths_t* kpaths_new();
     void kpaths_free(kpaths_t* kpaths);
     void kpaths_add_path(kpaths_t* kpaths, kpath_t* kpath);
+    kpath_t* kpaths_add_new_path(kpaths_t* kpaths);
     void kpaths_print(kpaths_t* kpaths);
 #ifdef __cplusplus
 }
