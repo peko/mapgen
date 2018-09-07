@@ -14,6 +14,7 @@ extern void spaceDraw(cpSpace* space);
 
 static cpBool onAntCollision(cpArbiter* arb, cpSpace* space, void* data);
 void drawKpaths(kpaths_t* paths, NVGcolor c);
+cpBody* createRoom(world_t* world);
 
 world_t* 
 worldNew(int ants_count, int food_count) {
@@ -25,7 +26,7 @@ worldNew(int ants_count, int food_count) {
     
     
     // walls
-    { 
+    if(0) { 
         cpShape *shape;
         cpBody *staticBody = cpSpaceGetStaticBody(w_space);
 
@@ -50,28 +51,24 @@ worldNew(int ants_count, int food_count) {
         cpShapeSetFriction  (shape, 1.0f);
         cpShapeSetCollisionType(shape, WALL);
     }
-
-    world->map = kpaths_new();
-    world->subj = kpaths_new();
-    world->clip = kpaths_new();
-    {
-        // no need to free, automaticaly cleared by kpaths_free
-        kpath_t* subj_path = kpaths_add_new_path(world->subj);
-        kpath_t* clip_path = kpaths_add_new_path(world->clip);
-        int n = 64;
-        for(size_t i=0; i<n; i++) {
-            kpoint_t p = {
-                400+300.0*cos(i/(float)n*3.141*2.0*3),
-            	400+300.0*sin(i/(float)n*3.141*2.0*5)};
-            kpath_add_point(subj_path, &p);            
-            p = (kpoint_t){
-                400+300.0*cos(i/(float)n*3.141*2.0*5),
-            	400+300.0*sin(i/(float)n*3.141*2.0*3)};
-            kpath_add_point(clip_path, &p);
+    
+    for(int i=0; i<40; i++) { 
+        cpBody* body = createRoom(world);
+        
+        // avoiding self ray-query by temporary disabling collision 
+        cpShape* shape = body->shapeList;
+        cpShapeFilter f = shape->filter;
+        shape->filter = CP_SHAPE_FILTER_NONE;
+    
+        cpPointQueryInfo nearestInfo = {};
+        cpSpacePointQueryNearest(w_space, body->p, 500.0, CP_SHAPE_FILTER_ALL, &nearestInfo);
+        if(nearestInfo.shape) {
+            cpVect* p = &nearestInfo.shape->body->p;
+            cpConstraint* constr = cpDampedSpringNew(body, nearestInfo.shape->body, cpv(0,0), cpv(-0,0), 50.0f, 5.0f, 0.3f);
+            //cpConstraint* constr =  cpPivotJointNew(body, nearestInfo.shape->body, cpvadd(body->p, cpv(100,100)));
+            cpSpaceAddConstraint(w_space, constr);
         }
-        clipp_kpaths(world->subj, world->clip, world->map);
-        printf("Clippig result:\n");
-        kpaths_print(world->map);
+        shape->filter = f;
     }
     
     cpCollisionHandler* h = cpSpaceAddWildcardHandler(w_space, ANT);
@@ -91,14 +88,36 @@ onAntCollision(cpArbiter* arb, cpSpace* space, void* data) {
     return cpTrue;
 }
 
+static void clipping(world_t* world) {
+    /*
+    kaths_t* map  = kpaths_new();
+    kaths_t* subj = kpaths_new();
+    kaths_t* clip = kpaths_new();
+    {
+        // no need to free, automaticaly cleared by kpaths_free
+        kpath_t* subj_path = kpaths_add_new_path(world->subj);
+        kpath_t* clip_path = kpaths_add_new_path(world->clip);
+        int n = 64;
+        for(size_t i=0; i<n; i++) {
+            kpoint_t p = {
+                400+300.0*cos(i/(float)n*3.141*2.0*3),
+                400+300.0*sin(i/(float)n*3.141*2.0*5)};
+            kpath_add_point(subj_path, &p);            
+            p = (kpoint_t){
+                400+300.0*cos(i/(float)n*3.141*2.0*5),
+                400+300.0*sin(i/(float)n*3.141*2.0*3)};
+            kpath_add_point(clip_path, &p);
+        }
+        clipp_kpaths(world->subj, world->clip, world->map);
+        printf("Clippig result:\n");
+        kpaths_print(world->map);
+    }
+    */
+}
+    
 void 
 worldFree(world_t* world) {
-
     cpSpaceFree(world->space);
-    kpaths_free(world->map);
-    kpaths_free(world->clip);
-    kpaths_free(world->subj);
-
     free(world);
 }
 
@@ -137,9 +156,6 @@ RGBAColor(float r, float g, float b, float a){
 void 
 worldRender(world_t* world) {
     spaceDraw(w_space);
-    drawKpaths(world->subj, nvgRGBA( 50, 50,255, 50));
-    drawKpaths(world->clip, nvgRGBA(255, 50, 50, 50));
-    drawKpaths(world->map , nvgRGBA(255,255,255,100));
 }
 
 static inline void 
@@ -153,6 +169,7 @@ drawVector(double x, double y, double dx, double dy, NVGcolor c) {
 
 void
 drawKpaths(kpaths_t* paths, NVGcolor c) {
+    if(paths == 0) return;
     nvgStrokeWidth(vg, 1.0);
     nvgStrokeColor(vg, c);
     nvgFillColor(vg, c);
@@ -167,4 +184,24 @@ drawKpaths(kpaths_t* paths, NVGcolor c) {
         nvgFill(vg);
         nvgStroke(vg);
     }
+}
+
+cpBody* createRoom(world_t* world) { 
+    cpBody*  body;
+    cpShape* shape;
+
+    cpFloat size = 30.0;
+    cpFloat mass =  1.0;
+
+    int w = rand()%10*4+40;
+    int h = rand()%10*4+40;
+    body = cpSpaceAddBody(w_space, cpBodyNew(mass, cpMomentForBox(mass, w, h)));
+    cpBodySetPosition(body, cpv(rand()%WIDTH, rand()%HEIGHT));    
+
+    shape = cpSpaceAddShape(w_space, cpBoxShapeNew(body, w, h, 5.0));
+    cpShapeSetElasticity(shape, 0.0f);
+    cpShapeSetFriction(shape, 0.7f);
+    cpShapeSetCollisionType(shape, BOX);
+
+    return body;
 }
