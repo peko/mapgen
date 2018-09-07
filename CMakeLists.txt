@@ -46,4 +46,5 @@ target_link_libraries(mapgen
     GL 
     glfw 
     m 
-    chipmunk)
+    chipmunk
+    clipper)

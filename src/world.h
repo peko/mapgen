@@ -1,11 +1,15 @@
 #pragma once
 
 #include <chipmunk/chipmunk_private.h>
+#include "clipper_c.h"
 
 typedef struct ant_t ant_t;
 
 typedef struct world_t {
     cpSpace* space;
+    kpaths_t* map;
+    kpaths_t* subj;
+    kpaths_t* clip;
 } world_t;
 
 world_t* worldNew(int ants_count, int food_count);
