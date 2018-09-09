@@ -11,7 +11,7 @@
 #define VISION_ANGLE      PI/2.0
 #define VISION_RANGE      500.0
 #define VISION_DAMPING    0.1
-#define SPACE_DAMPING     0.1
+#define SPACE_DAMPING     0.9
 #define FORCE_MULTIPLIER  100.0
 #define Y_COUNT           3
 #define X_COUNT           (VISION_RESOLUTION*VISION_LAYERS)

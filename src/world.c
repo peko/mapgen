@@ -4,6 +4,7 @@
 #include "globals.h"
 #include "nanovg.h"
 #include "world.h"
+#include "room.h"
 
 #include "clipper_c.h"
 
@@ -17,75 +18,22 @@ void drawKpaths(kpaths_t* paths, NVGcolor c);
 cpBody* createRoom(world_t* world);
 
 world_t* 
-worldNew(int ants_count, int food_count) {
+worldNew() {
 
     world_t* world = calloc(sizeof(world_t), 1);
     w_space = cpSpaceNew();
 
     cpSpaceSetDamping(w_space, SPACE_DAMPING);
-    
-    
-    // walls
-    if(0) { 
-        cpShape *shape;
-        cpBody *staticBody = cpSpaceGetStaticBody(w_space);
 
-        // Create segments around the edge of the screen.
-        shape = cpSpaceAddShape(w_space, cpSegmentShapeNew(staticBody, cpv(0,0), cpv(0, HEIGHT-0), 0.0f));
-        cpShapeSetElasticity(shape, 1.0f);
-        cpShapeSetFriction  (shape, 1.0f);
-        cpShapeSetCollisionType(shape, WALL);
+    room_t* a = roomNew(world, (cpVect){0.0,0.0});
+    room_t* b = roomNew(world, (cpVect){0.0,0.0});
+    room_t* c = roomNew(world, (cpVect){0.0,0.0});
 
-        shape = cpSpaceAddShape(w_space, cpSegmentShapeNew(staticBody, cpv(0,0), cpv(WIDTH-0, 0), 0.0f));
-        cpShapeSetElasticity(shape, 1.0f);
-        cpShapeSetFriction  (shape, 1.0f);
-        cpShapeSetCollisionType(shape, WALL);
-        
-        shape = cpSpaceAddShape(w_space, cpSegmentShapeNew(staticBody, cpv(WIDTH-0,0), cpv(WIDTH-0, HEIGHT-0), 0.0f));
-        cpShapeSetElasticity(shape, 1.0f);
-        cpShapeSetFriction  (shape, 1.0f);
-        cpShapeSetCollisionType(shape, WALL);
-
-        shape = cpSpaceAddShape(w_space, cpSegmentShapeNew(staticBody, cpv(0, HEIGHT-0), cpv(WIDTH-0, HEIGHT-0), 0.0f));
-        cpShapeSetElasticity(shape, 1.0f);
-        cpShapeSetFriction  (shape, 1.0f);
-        cpShapeSetCollisionType(shape, WALL);
-    }
+    tunnel_t* ab = roomsConnect(world, a, b);
+    tunnel_t* bc = roomsConnect(world, b, c);
+    tunnel_t* ca = roomsConnect(world, c, a);
     
-    for(int i=0; i<80; i++) { 
-        cpBody* body = createRoom(world);
-        
-        // avoiding self ray-query by temporary disabling collision 
-        cpShape* shape = body->shapeList;
-        cpShapeFilter f = shape->filter;
-        shape->filter = CP_SHAPE_FILTER_NONE;
-    
-        cpPointQueryInfo nearestInfo = {};
-        cpSpacePointQueryNearest(w_space, body->p, 500.0, CP_SHAPE_FILTER_ALL, &nearestInfo);
-        if(nearestInfo.shape) {
-            cpVect* p = &nearestInfo.shape->body->p;
-            cpConstraint* constr = cpDampedSpringNew(body, nearestInfo.shape->body, cpv(0,0), cpv(-0,0), 50.0f, 5.0f, 0.3f);
-            //cpConstraint* constr =  cpPivotJointNew(body, nearestInfo.shape->body, cpvmult(cpvadd(body->p, *p), 0.5));
-            cpSpaceAddConstraint(w_space, constr);
-        }
-        shape->filter = f;
-    }
-    
-    cpCollisionHandler* h = cpSpaceAddWildcardHandler(w_space, ANT);
-    h->beginFunc = onAntCollision; 
-
     return world;
-}
-
-
-static cpBool 
-onAntCollision(cpArbiter* arb, cpSpace* space, void* data) {
-    // if(arb->b->type == FOOD) {
-    //     arb->b->body->p.x = rnd(WIDTH);
-    //     arb->b->body->p.y = rnd(HEIGHT);
-    //     return cpFalse;
-    // }
-    return cpTrue;
 }
 
 static void clipping(world_t* world) {
@@ -199,8 +147,8 @@ cpBody* createRoom(world_t* world) {
     cpBodySetPosition(body, cpv(rand()%WIDTH, rand()%HEIGHT));    
 
     shape = cpSpaceAddShape(w_space, cpBoxShapeNew(body, w, h, 5.0));
-    cpShapeSetElasticity(shape, 0.0f);
-    cpShapeSetFriction(shape, 0.7f);
+    //cpShapeSetElasticity(shape, 0.0f);
+    //cpShapeSetFriction(shape, 0.7f);
     cpShapeSetCollisionType(shape, BOX);
 
     return body;

@@ -23,7 +23,7 @@ void key(int key, int action) {
 
 int main(int argc, char* argv[]) {
 
-    world = worldNew(5, 20);
+    world = worldNew();
 
     engine_init();
     engine_update = update;
