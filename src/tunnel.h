@@ -6,8 +6,14 @@ typedef struct room_t room_t;
 typedef struct world_t world_t;
 
 typedef struct tunnel_t {
-    room_t* a;
-    room_t* b;
+    room_t* a_room;
+    room_t* b_room;
+    
+    cpArray* shapes;
+    cpArray* bodies;
+
+    cpBody* a_body;
+    cpBody* b_body;
 } tunnel_t;
 
 tunnel_t* tunnelNew(world_t* world);

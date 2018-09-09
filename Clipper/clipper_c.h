@@ -1,6 +1,6 @@
 #pragma once
 
-#include "kvec.h"
+#include <kvec.h>
 
 typedef struct {int64_t x, y;} kpoint_t;
 typedef kvec_t(kpoint_t) kpath_t;

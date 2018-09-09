@@ -1,3 +1,4 @@
+#include <time.h>
 #include <GLFW/glfw3.h>
 
 #include "engine.h"
@@ -22,6 +23,8 @@ void key(int key, int action) {
 }
 
 int main(int argc, char* argv[]) {
+
+    srand(time(NULL));
 
     world = worldNew();
 

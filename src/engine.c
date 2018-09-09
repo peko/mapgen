@@ -189,9 +189,13 @@ DrawFatSegment(
     nvgBeginPath(vg);
     nvgMoveTo(vg, a.x, a.y);
     nvgLineTo(vg, b.x, b.y);
-    nvgStrokeWidth(vg, radius);
     nvgLineCap(vg, NVG_ROUND);
+    nvgStrokeWidth(vg, radius);
     nvgStrokeColor(vg, nvgRGBAf(outlineColor.r, outlineColor.g, outlineColor.b, outlineColor.a));
+    nvgStroke(vg);
+
+    nvgStrokeWidth(vg, radius-2.0);
+    nvgStrokeColor(vg, nvgRGBAf(outlineColor.r/2.0, outlineColor.g/2.0, outlineColor.b/2.0, outlineColor.a));
     nvgStroke(vg);
 };
     

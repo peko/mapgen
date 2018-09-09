@@ -149,7 +149,7 @@ cpBody* createRoom(world_t* world) {
     shape = cpSpaceAddShape(w_space, cpBoxShapeNew(body, w, h, 5.0));
     //cpShapeSetElasticity(shape, 0.0f);
     //cpShapeSetFriction(shape, 0.7f);
-    cpShapeSetCollisionType(shape, BOX);
+    //cpShapeSetCollisionType(shape, BOX);
 
     return body;
 }

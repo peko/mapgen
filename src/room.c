@@ -6,6 +6,8 @@
 #define r_pos   (room->pos)
 #define r_body  (room->body)
 #define r_shape (room->shape)
+#define r_w     (room->w)
+#define r_h     (room->h)
 
 room_t* 
 roomNew(world_t* world, cpVect cp) {
@@ -15,14 +17,16 @@ roomNew(world_t* world, cpVect cp) {
     cpFloat size = 30.0;
     cpFloat mass =  1.0;
 
-    int w = rand()%10*4+40;
-    int h = rand()%10*4+40;
-
-    r_body = cpSpaceAddBody(world->space, cpBodyNew(mass, cpMomentForBox(mass, w, h)));
-    cpBodySetPosition(r_body, cpv(rand()%WIDTH, rand()%HEIGHT));    
-
-    r_shape = cpSpaceAddShape(world->space, cpBoxShapeNew(r_body, w, h, 5.0));
-    cpShapeSetCollisionType(r_shape, BOX);
+    r_w = rand()%10*8+40;
+    r_h = rand()%10*8+40;
+    cpVect p = cpv(rand()%WIDTH, rand()%HEIGHT);
+    r_body = cpSpaceAddBody(
+        world->space, 
+        cpBodyNew(mass, cpMomentForBox(mass, r_w, r_h)));
+    cpBodySetPosition(r_body, p);    
+    r_shape = cpSpaceAddShape(
+        world->space, 
+        cpBoxShapeNew(r_body, r_w, r_h, 5.0));
 
     return room;
 }

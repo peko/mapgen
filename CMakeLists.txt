@@ -17,7 +17,10 @@ add_library(nanovg STATIC
     nanovg/src/nanovg.c
 )
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Clipper)
+include_directories(
+    ${CMAKE_CURRENT_SOURCE_DIR}/src 
+    ${CMAKE_CURRENT_SOURCE_DIR}/Clipper)
+
 add_library(clipper STATIC 
     Clipper/clipper.cpp
     Clipper/clipper_c.cpp

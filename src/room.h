@@ -1,6 +1,6 @@
 #pragma once
 
-#include <chipmunk/chipmunk_private.h>
+#include "globals.h"
 
 typedef struct world_t world_t;
 typedef struct tunnel_t tunnel_t;
@@ -9,6 +9,7 @@ typedef struct room_t {
     cpVect*  pos;
     cpBody*  body;
     cpShape* shape;
+    cpFloat  w, h;
 } room_t;
 
 room_t* roomNew(world_t* world, cpVect pos);
