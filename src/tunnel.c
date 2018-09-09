@@ -70,9 +70,16 @@ void tunnelSetA(tunnel_t* tunnel, room_t* a) {
     cpBodySetPosition(tunnel->a_body, cpvadd(p, cpv(0.0,-20.0)));
     cpBodySetAngle(tunnel->a_body, cpBodyGetAngle(a->body)-3.141);
     
-    cpConstraint* j = cpPivotJointNew(
+    cpConstraint* j;
+    //j = cpPivotJointNew(
+    //    tunnel->a_body, 
+    //    tunnel->a_room->body, 
+    //    p);
+    j = cpGrooveJointNew(
         tunnel->a_body, 
-        tunnel->a_room->body, 
+        tunnel->a_room->body,
+        cpvadd(p, cpv( a->w/2.0,0)),
+        cpvadd(p, cpv(-a->w/2.0,0)), 
         p);
     cpSpaceAddConstraint(tunnel->a_body->space, j);
     j = cpDampedRotarySpringNew(
@@ -89,7 +96,8 @@ void tunnelSetB(tunnel_t* tunnel, room_t* b) {
     cpBodySetPosition(tunnel->b_body, cpvadd(p, cpv(0.0,-20.0)));
     cpBodySetAngle(tunnel->b_body, cpBodyGetAngle(b->body));
 
-    cpConstraint* j = cpPivotJointNew(
+    cpConstraint* j;
+    j = cpPivotJointNew(
         tunnel->b_body, 
         tunnel->b_room->body, 
         p);
