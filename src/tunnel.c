@@ -20,12 +20,9 @@ tunnel_t* tunnelNew(world_t* world) {
     cpBody* body = 0;
     cpBody* old  = 0;
 
-    tunnel->bodies = cpArrayNew(5); 
-    tunnel->shapes = cpArrayNew(5);
-
     cpShapeFilter filter = cpShapeFilterNew(1, CP_ALL_CATEGORIES, CP_ALL_CATEGORIES);
     
-    for(int i=0; i<5; i++) {
+    for(int i=0; i<10; i++) {
 
         cpVect a = cpv(0, -h/2.0);
         cpVect b = cpv(0,  h/2.0);
@@ -38,7 +35,7 @@ tunnel_t* tunnelNew(world_t* world) {
         cpShapeSetElasticity(shape, 0.0f);
         cpShapeSetFriction(shape, 0.7f);
 
-        if(i==0 || i==4) {
+        if(i==0 || i==9) {
             cpShapeSetFilter(shape, CP_SHAPE_FILTER_NONE);
         } else {
             cpShapeSetFilter(shape, filter);
@@ -50,7 +47,9 @@ tunnel_t* tunnelNew(world_t* world) {
         } else {
             cpConstraint* j =  cpPivotJointNew(body, old, cpvadd(cpv(x,y+h*i),a));
             cpSpaceAddConstraint(world->space, j);
-            j = cpDampedRotarySpringNew(body, old, 0.0f, 3000.0f, 60.0f);
+            j = cpDampedRotarySpringNew(
+                body, old, 
+                0.0f, 30000.0f, 60.0f);
             cpSpaceAddConstraint(world->space, j);
         } 
         old = body;
@@ -76,7 +75,6 @@ void tunnelSetA(tunnel_t* tunnel, room_t* a) {
         tunnel->a_room->body, 
         p);
     cpSpaceAddConstraint(tunnel->a_body->space, j);
-    return;
     j = cpDampedRotarySpringNew(
         tunnel->a_body,
         tunnel->a_room->body,
@@ -96,7 +94,6 @@ void tunnelSetB(tunnel_t* tunnel, room_t* b) {
         tunnel->b_room->body, 
         p);
     cpSpaceAddConstraint(tunnel->b_body->space, j);
-    return;
     j = cpDampedRotarySpringNew(
         tunnel->b_body,
         tunnel->b_room->body,
