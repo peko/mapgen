@@ -77,11 +77,11 @@ void
 worldUpdate(world_t* world, float dt) {
     // cpSpaceStep(w_space, dt);
     cpSpaceStep(w_space, 1.0/60.0);
-    cpBB bb = {0};
-    cpSpaceEachShape(w_space, eachShape, &bb);
-    printf("%f %f %f %f\n",  
-        bb.l,  bb.r, 
-        bb.t,  bb.b); 
+    // cpBB bb = {0};
+    // cpSpaceEachShape(w_space, eachShape, &bb);
+    // printf("%f %f %f %f\n",  
+    //     bb.l,  bb.r, 
+    //     bb.t,  bb.b); 
 }
 
 // Move 

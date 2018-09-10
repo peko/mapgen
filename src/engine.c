@@ -72,6 +72,44 @@ key(
     if(engine_key!=NULL) engine_key(key, action);
 }
 
+double mouseX;
+double mouseY;
+
+static void 
+cursor(GLFWwindow* win, double x, double y){
+    mouseX = x;
+    mouseY = y;
+}
+
+
+int dragging = 0;
+double dragX;
+double dragY;
+static void
+mouse(GLFWwindow* win, int button, int action, int mods) {
+    if(button == GLFW_MOUSE_BUTTON_LEFT) {
+        if (action == GLFW_PRESS) {
+       		dragging = 1;
+       		dragX = mouseX;
+       		dragY = mouseY;
+        } else if(action == GLFW_RELEASE) {
+            dragging = 0;
+            tx += mouseX - dragX;
+            ty += mouseY - dragY;
+        }
+    }
+}
+
+static void 
+scroll(GLFWwindow* win, double dx, double dy){
+    float k = dy>0.0 ? 1.5 : 1.0/1.5;
+    tx = k*(tx-mouseX)+mouseX;
+    ty = k*(ty-mouseY)+mouseY;
+	zoom*=k;		
+}
+
+static void DrawCursor();
+
 int 
 engine_init () {
 
@@ -96,7 +134,11 @@ engine_init () {
 		return -1;
 	}
 
-	glfwSetKeyCallback(window, key);
+    // callbacks
+	glfwSetKeyCallback         (window, key   );
+	glfwSetCursorPosCallback   (window, cursor);
+	glfwSetScrollCallback      (window, scroll);
+	glfwSetMouseButtonCallback (window, mouse );
 
 	glfwMakeContextCurrent(window);
 #ifdef NANOVG_GLEW
@@ -166,10 +208,16 @@ engine_start() {
         // char fps[32];
         // sprintf(fps, "%4.1f fps", 1.0/dt);
 		// nvgText(vg, 10.0, 10.0, fps, NULL);
-
-        nvgTransform(vg, zoom, 0.0, 0.0, zoom, tx, ty);
-
+        nvgSave(vg);
+        if (dragging) {
+        	nvgTransform(vg, zoom, 0.0, 0.0, zoom, tx-dragX+mouseX, ty-dragY+mouseY);
+        } else {
+        	nvgTransform(vg, zoom, 0.0, 0.0, zoom, tx, ty);
+        }
         if(engine_render!=NULL) engine_render(dt);
+        nvgRestore(vg);
+
+        DrawCursor();
 		nvgEndFrame(vg);
 	
 		glfwSwapBuffers(window);
@@ -193,13 +241,13 @@ DrawCircle(
     nvgCircle(vg, pos.x, pos.y, radius);
     nvgMoveTo(vg, pos.x, pos.y);
     nvgLineTo(vg, pos.x+cos(angle)*radius, pos.y+sin(angle)*radius);
-    nvgStrokeWidth(vg, 1.0);
+    nvgStrokeWidth(vg, 1.0/zoom);
     nvgStrokeColor(vg, nvgRGBAf(outlineColor.r, outlineColor.g, outlineColor.b, outlineColor.a));
     nvgStroke(vg);
         
 };
 
-void 
+static void 
 DrawSegment(
     cpVect a, 
     cpVect b, 
@@ -209,7 +257,7 @@ DrawSegment(
     nvgBeginPath(vg);
     nvgMoveTo(vg, a.x, a.y);
     nvgLineTo(vg, b.x, b.y);
-    nvgStrokeWidth(vg, 1.0);
+    nvgStrokeWidth(vg, 1.0/zoom);
     nvgStrokeColor(vg, nvgRGBAf(color.r, color.g, color.b, color.a));
     nvgStroke(vg);
 };
@@ -252,10 +300,11 @@ DrawPolygon(
     }
     nvgLineTo(vg, verts[0].x, verts[0].y);
     nvgStrokeColor(vg, nvgRGBAf(outlineColor.r, outlineColor.g, outlineColor.b, outlineColor.a));
+    nvgStrokeWidth(vg, 1.0/zoom);
     nvgStroke(vg);
 };
 
-void 
+static void 
 DrawDot(
     cpFloat size,
     cpVect pos,
@@ -264,10 +313,27 @@ DrawDot(
 
     nvgBeginPath(vg);
     nvgCircle(vg, pos.x, pos.y, size);
-    nvgStrokeWidth(vg, 1.0);
+    nvgStrokeWidth(vg, 1.0/zoom);
     nvgStrokeColor(vg, nvgRGBAf(color.r, color.g, color.b, color.a));
     nvgStroke(vg);
 };
+
+static void
+DrawCursor() {
+    nvgSave(vg);
+    {
+        nvgTranslate(vg, mouseX-0.5, mouseY-0.5);
+        nvgBeginPath(vg);
+        nvgMoveTo(vg,-20.0,  0.0);
+        nvgLineTo(vg, 20.0,  0.0);
+        nvgMoveTo(vg,  0.0,-20.0);
+        nvgLineTo(vg,  0.0, 20.0); 
+        nvgStrokeWidth(vg, 1.0);
+        nvgStrokeColor(vg, nvgRGBAf(1.0,1.0,1.0,0.5));
+        nvgStroke(vg);
+    }
+    nvgRestore(vg);
+}
 
 static inline cpSpaceDebugColor 
 RGBAColor(float r, float g, float b, float a){
