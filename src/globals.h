@@ -9,6 +9,8 @@
 #define PI  3.1415926
 #define PI2 PI*2.0
 
+#define TUNNEL_R 10.0
+
 #define SPACE_DAMPING     0.1
 #define FORCE_MULTIPLIER  100.0
 #define Y_COUNT           3

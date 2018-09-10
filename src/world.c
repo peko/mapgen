@@ -24,14 +24,13 @@ worldNew() {
     w_space = cpSpaceNew();
 
     cpSpaceSetDamping(w_space, SPACE_DAMPING);
-
-    room_t* a = roomNew(world, (cpVect){0.0,0.0});
-    room_t* b = roomNew(world, (cpVect){0.0,0.0});
-    room_t* c = roomNew(world, (cpVect){0.0,0.0});
-
-    tunnel_t* ab = roomsConnect(world, a, b);
-    tunnel_t* bc = roomsConnect(world, b, c);
-    tunnel_t* ca = roomsConnect(world, c, a);
+    for(int i=0; i<40; i++) {
+        roomNew(world, (cpVect){0.0,0.0});
+    }
+ 
+    //tunnel_t* ab = roomsConnect(world, a, b);
+    //tunnel_t* bc = roomsConnect(world, b, c);
+    //tunnel_t* ca = roomsConnect(world, c, a);
     
     return world;
 }
@@ -69,10 +68,20 @@ worldFree(world_t* world) {
     free(world);
 }
 
+void eachShape(cpShape* shape, void* data) {
+    cpBB* bb = data;
+    *bb = cpBBMerge(shape->bb, *bb);
+}
+
 void 
 worldUpdate(world_t* world, float dt) {
     // cpSpaceStep(w_space, dt);
     cpSpaceStep(w_space, 1.0/60.0);
+    cpBB bb = {0};
+    cpSpaceEachShape(w_space, eachShape, &bb);
+    printf("%f %f %f %f\n",  
+        bb.l,  bb.r, 
+        bb.t,  bb.b); 
 }
 
 // Move 

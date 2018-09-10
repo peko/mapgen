@@ -2,6 +2,8 @@
 
 #include <chipmunk/chipmunk_private.h>
 
+#include "globals.h"
+
 #ifdef NANOVG_GLEW
 #  include <GL/glew.h>
 #endif
@@ -28,17 +30,50 @@ GLFWwindow* window;
 NVGcontext* vg = NULL;
 int font = -1;
 double prevt = 0;
+double zoom = 1.0;
+double tx = 0.0;
+double ty = 0.0;
 
-static void key(GLFWwindow* window, int key, int scancode, int action, int mods) {
+static void 
+key(
+    GLFWwindow* window, 
+    int key, 
+    int scancode, 
+    int action, 
+    int mods) {
+        
 	NVG_NOTUSED(scancode);
 	NVG_NOTUSED(mods);
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS){
 		glfwSetWindowShouldClose(window, GL_TRUE);
 	}
+
+	if (key == GLFW_KEY_KP_SUBTRACT && action == GLFW_PRESS){
+		zoom /= 1.1;
+	}
+
+	if (key == GLFW_KEY_KP_ADD && action == GLFW_PRESS){
+		zoom *= 1.1;		
+	}
+	
+	if (key == GLFW_KEY_KP_4 && action == GLFW_PRESS){
+		tx+=50.0;
+	}
+	if (key == GLFW_KEY_KP_6 && action == GLFW_PRESS){
+		tx-=50.0;
+	}
+	if (key == GLFW_KEY_KP_8 && action == GLFW_PRESS){
+		ty+=50.0;
+	}
+	if (key == GLFW_KEY_KP_5 && action == GLFW_PRESS){
+		ty-=50.0;
+	}
+	
     if(engine_key!=NULL) engine_key(key, action);
 }
 
-int engine_init () {
+int 
+engine_init () {
 
 	if (!glfwInit()) {
 		printf("Failed to init GLFW.");
@@ -124,13 +159,15 @@ engine_start() {
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
 
 		nvgBeginFrame(vg, winWidth, winHeight, pxRatio);
-		nvgFontSize(vg, 20.0);
-		nvgFontFace(vg, "sans");
-		nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
+		// nvgFontSize(vg, 20.0);
+		// nvgFontFace(vg, "sans");
+		// nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
 
         // char fps[32];
         // sprintf(fps, "%4.1f fps", 1.0/dt);
 		// nvgText(vg, 10.0, 10.0, fps, NULL);
+
+        nvgTransform(vg, zoom, 0.0, 0.0, zoom, tx, ty);
 
         if(engine_render!=NULL) engine_render(dt);
 		nvgEndFrame(vg);

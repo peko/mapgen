@@ -21,26 +21,21 @@ tunnel_t* tunnelNew(world_t* world) {
     cpBody* old  = 0;
 
     cpShapeFilter filter = cpShapeFilterNew(1, CP_ALL_CATEGORIES, CP_ALL_CATEGORIES);
-    
-    for(int i=0; i<10; i++) {
+    int n = 5;
+    for(int i=0; i<n; i++) {
 
         cpVect a = cpv(0, -h/2.0);
         cpVect b = cpv(0,  h/2.0);
         
-        cpFloat m = cpMomentForSegment(mass, a, b, 0.0f);
+        cpFloat m = cpMomentForSegment(mass, a, b, TUNNEL_R);
         body = cpSpaceAddBody(world->space, cpBodyNew(mass, m));
         cpBodySetPosition(body, cpv(x, y+i*h));
 
-        cpShape *shape = cpSpaceAddShape(world->space, cpSegmentShapeNew(body, a, b, 10.0f));
+        cpShape *shape = cpSpaceAddShape(world->space, cpSegmentShapeNew(body, a, b, TUNNEL_R));
         cpShapeSetElasticity(shape, 0.0f);
         cpShapeSetFriction(shape, 0.7f);
 
-        if(i==0 || i==9) {
-            cpShapeSetFilter(shape, CP_SHAPE_FILTER_NONE);
-        } else {
-            cpShapeSetFilter(shape, filter);
-        }
-        cpShapeSetFilter(shape, CP_SHAPE_FILTER_NONE);
+        cpShapeSetFilter(shape, filter);
         
         if(old == 0) {
             tunnel->a_body = body;
@@ -67,8 +62,8 @@ void tunnelSetA(tunnel_t* tunnel, room_t* a) {
     tunnel->a_room = a; 
     cpVect p = cpvadd(a->body->p, cpv(0,-a->h/2.0));
 
-    cpBodySetPosition(tunnel->a_body, cpvadd(p, cpv(0.0,-20.0)));
-    cpBodySetAngle(tunnel->a_body, cpBodyGetAngle(a->body)-3.141);
+    cpBodySetPosition(tunnel->a_body, cpvadd(p, cpv(0.0,-20.0-15.0)));
+    cpBodySetAngle(tunnel->a_body, cpBodyGetAngle(a->body)+3.141);
     
     cpConstraint* j;
     //j = cpPivotJointNew(
@@ -76,11 +71,11 @@ void tunnelSetA(tunnel_t* tunnel, room_t* a) {
     //    tunnel->a_room->body, 
     //    p);
     j = cpGrooveJointNew(
-        tunnel->a_body, 
         tunnel->a_room->body,
-        cpvadd(p, cpv( a->w/2.0,0)),
-        cpvadd(p, cpv(-a->w/2.0,0)), 
-        p);
+        tunnel->a_body, 
+        cpv( a->w/2.0-TUNNEL_R, -a->h/2.0-15.0),
+        cpv(-a->w/2.0+TUNNEL_R, -a->h/2.0-15.0), 
+        cpv(0,-20.0));
     cpSpaceAddConstraint(tunnel->a_body->space, j);
     j = cpDampedRotarySpringNew(
         tunnel->a_body,
@@ -93,14 +88,20 @@ void tunnelSetB(tunnel_t* tunnel, room_t* b) {
     tunnel->b_room = b;
     cpVect p = cpvadd(b->body->p, cpv(0,b->h/2.0));
 
-    cpBodySetPosition(tunnel->b_body, cpvadd(p, cpv(0.0,-20.0)));
-    cpBodySetAngle(tunnel->b_body, cpBodyGetAngle(b->body));
+    cpBodySetPosition(tunnel->b_body, cpvadd(p, cpv(0.0,20.0+15.0)));
+    cpBodySetAngle(tunnel->b_body, cpBodyGetAngle(b->body)+3.141);
 
     cpConstraint* j;
-    j = cpPivotJointNew(
+    j = cpGrooveJointNew(
+        tunnel->b_room->body,
         tunnel->b_body, 
-        tunnel->b_room->body, 
-        p);
+        cpv( b->w/2.0-TUNNEL_R, b->h/2.0+15.0),
+        cpv(-b->w/2.0+TUNNEL_R, b->h/2.0+15.0), 
+        cpv(0, 20.0));
+    // j = cpPivotJointNew(
+    //     tunnel->b_body, 
+    //     tunnel->b_room->body, 
+    //     p);
     cpSpaceAddConstraint(tunnel->b_body->space, j);
     j = cpDampedRotarySpringNew(
         tunnel->b_body,
