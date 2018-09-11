@@ -110,6 +110,7 @@ scroll(GLFWwindow* win, double dx, double dy){
 
 static void DrawCursor();
 
+
 int 
 engine_init () {
 
@@ -173,6 +174,8 @@ engine_deinit() {
 	glfwTerminate();
 }
 
+#include "worley.c"
+
 void 
 engine_start() {
     while (!glfwWindowShouldClose(window)) {
@@ -218,6 +221,7 @@ engine_start() {
         nvgRestore(vg);
 
         DrawCursor();
+        DrawWorley();
 		nvgEndFrame(vg);
 	
 		glfwSwapBuffers(window);
