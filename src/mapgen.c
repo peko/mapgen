@@ -2,31 +2,31 @@
 #include <GLFW/glfw3.h>
 
 #include "engine.h"
-#include "world.h"
+#include "level.h"
 
-world_t* world = NULL;
+mgLevel* level = NULL;
 
 void update(float dt){
-    if(world) worldUpdate(world, dt);
+    if(level) mgLevelUpdate(level, dt);
 }
 
 void render(float dt) {
-    if(world) worldRender(world);
+    if(level) mgLevelRender(level);
 }
 
 void key(int key, int action) {
-    if(!world) return; 
-    if (key == GLFW_KEY_KP_8) worldUp   (world);
-    if (key == GLFW_KEY_KP_5) worldDown (world);
-    if (key == GLFW_KEY_KP_4) worldLeft (world);
-    if (key == GLFW_KEY_KP_6) worldRight(world);
+    if(!level) return; 
+    if (key == GLFW_KEY_KP_8) mgLevelUp   (level);
+    if (key == GLFW_KEY_KP_5) mgLevelDown (level);
+    if (key == GLFW_KEY_KP_4) mgLevelLeft (level);
+    if (key == GLFW_KEY_KP_6) mgLevelRight(level);
 }
 
 int main(int argc, char* argv[]) {
 
     srand(time(NULL));
 
-    world = worldNew();
+    level = mgLevelNew();
 
     engine_init();
     engine_update = update;
@@ -35,7 +35,7 @@ int main(int argc, char* argv[]) {
     engine_start();
     engine_deinit();
     
-    worldFree(world);
+    mgLevelFree(level);
 
     return 0;
 }

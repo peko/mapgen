@@ -3,7 +3,7 @@
 #include <chipmunk/chipmunk_private.h>
 
 typedef struct room_t room_t;
-typedef struct world_t world_t;
+typedef struct mgLevel mgLevel;
 
 typedef struct tunnel_t {
     room_t* a_room;
@@ -16,7 +16,7 @@ typedef struct tunnel_t {
     cpBody* b_body;
 } tunnel_t;
 
-tunnel_t* tunnelNew(world_t* world);
+tunnel_t* tunnelNew(mgLevel* level);
 void tunnelFree(tunnel_t* tunnel);
 
 void tunnelSetA(tunnel_t* tunnel, room_t* a);

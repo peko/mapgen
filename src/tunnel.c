@@ -1,12 +1,12 @@
 #include "tunnel.h"
 
 #include "room.h"
-#include "world.h"
+#include "level.h"
 #include "globals.h"
 
 extern cpSpace* space;
 
-tunnel_t* tunnelNew(world_t* world) {
+tunnel_t* tunnelNew(mgLevel* level) {
     tunnel_t* tunnel = calloc(1,sizeof(tunnel_t));
 
     cpFloat size = 30.0;
@@ -28,10 +28,10 @@ tunnel_t* tunnelNew(world_t* world) {
         cpVect b = cpv(0,  h/2.0);
         
         cpFloat m = cpMomentForSegment(mass, a, b, TUNNEL_R);
-        body = cpSpaceAddBody(world->space, cpBodyNew(mass, m));
+        body = cpSpaceAddBody(level->space, cpBodyNew(mass, m));
         cpBodySetPosition(body, cpv(x, y+i*h));
 
-        cpShape *shape = cpSpaceAddShape(world->space, cpSegmentShapeNew(body, a, b, TUNNEL_R));
+        cpShape *shape = cpSpaceAddShape(level->space, cpSegmentShapeNew(body, a, b, TUNNEL_R));
         cpShapeSetElasticity(shape, 0.0f);
         cpShapeSetFriction(shape, 0.7f);
 
@@ -41,11 +41,11 @@ tunnel_t* tunnelNew(world_t* world) {
             tunnel->a_body = body;
         } else {
             cpConstraint* j =  cpPivotJointNew(body, old, cpvadd(cpv(x,y+h*i),a));
-            cpSpaceAddConstraint(world->space, j);
+            cpSpaceAddConstraint(level->space, j);
             j = cpDampedRotarySpringNew(
                 body, old, 
                 0.0f, 30000.0f, 60.0f);
-            cpSpaceAddConstraint(world->space, j);
+            cpSpaceAddConstraint(level->space, j);
         } 
         old = body;
     }
