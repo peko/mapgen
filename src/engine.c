@@ -174,7 +174,6 @@ engine_deinit() {
 	glfwTerminate();
 }
 
-#include "worley.c"
 
 void 
 engine_start() {
@@ -221,7 +220,6 @@ engine_start() {
         nvgRestore(vg);
 
         DrawCursor();
-        DrawWorley();
 		nvgEndFrame(vg);
 	
 		glfwSwapBuffers(window);
