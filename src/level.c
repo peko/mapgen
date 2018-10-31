@@ -43,6 +43,8 @@ void eachBody(cpBody* body, void* data) {
     printf("%f, %f\n", p->x, p->y);
 }
 
+kvec
+
 void 
 mgLevelUpdate(mgLevel* level, float dt) {
     // cpSpaceStep(l_space, dt);
