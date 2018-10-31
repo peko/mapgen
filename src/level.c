@@ -37,15 +37,19 @@ mgLevelFree(mgLevel* level) {
     free(level);
 }
 
-void eachShape(cpShape* shape, void* data) {
-    cpBB* bb = data;
-    *bb = cpBBMerge(shape->bb, *bb);
+void eachBody(cpBody* body, void* data) {
+    cpArray* a = data;
+    cpVect* p = &body->p;
+    printf("%f, %f\n", p->x, p->y);
 }
 
 void 
 mgLevelUpdate(mgLevel* level, float dt) {
     // cpSpaceStep(l_space, dt);
     cpSpaceStep(l_space, 1.0/60.0);
+    //cpArray* points = cpArrayNew();
+    //buildDelaunay(mgLevel* level);
+    cpSpaceEachBody(l_space, eachBody, NULL);
     // cpBB bb = {0};
     // cpSpaceEachShape(l_space, eachShape, &bb);
     // printf("%f %f %f %f\n",  
@@ -164,4 +168,8 @@ drawKpaths(kpaths_t* paths, NVGcolor c) {
         nvgFill(vg);
         nvgStroke(vg);
     }
+}
+
+static void buildDelaunay(mgLevel* level) {
+	
 }
