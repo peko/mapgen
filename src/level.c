@@ -10,7 +10,7 @@
 
 #define l_space (level->space)
 
-extern  NVGcontext* vg;
+extern NVGcontext* vg;
 extern void spaceDraw(cpSpace* space);
 
 static cpBool onAntCollision(cpArbiter* arb, cpSpace* space, void* data);
