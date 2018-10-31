@@ -1,6 +1,6 @@
 #include "room.h"
 #include "tunnel.h"
-#include "world.h"
+#include "level.h"
 #include "globals.h"
 
 #define r_pos   (room->pos)
@@ -10,7 +10,7 @@
 #define r_h     (room->h)
 
 room_t* 
-roomNew(world_t* world, cpVect cp) {
+roomNew(mgLevel* level, cpVect cp) {
 
     room_t* room = calloc(1, sizeof(room_t));
     
@@ -21,11 +21,11 @@ roomNew(world_t* world, cpVect cp) {
     r_h = rand()%10*8+40;
     cpVect p = cpv(rand()%WIDTH, rand()%HEIGHT);
     r_body = cpSpaceAddBody(
-        world->space, 
+        level->space, 
         cpBodyNew(mass, cpMomentForBox(mass, r_w, r_h)));
     cpBodySetPosition(r_body, p);    
     r_shape = cpSpaceAddShape(
-        world->space, 
+        level->space, 
         cpBoxShapeNew(r_body, r_w, r_h, 5.0));
 
     return room;
@@ -38,15 +38,15 @@ roomFree(room_t* room) {
     free(room);
 }
 
-tunnel_t* roomsConnect(world_t* world, room_t* a, room_t* b) {
-    tunnel_t* tunnel = tunnelNew(world);
+tunnel_t* roomsConnect(mgLevel* level, room_t* a, room_t* b) {
+    tunnel_t* tunnel = tunnelNew(level);
     tunnelSetA(tunnel, a);
     tunnelSetB(tunnel, b);
     return tunnel;
 }
 
 /*    
-        cpBody* body = createRoom(world);
+        cpBody* body = createRoom(level);
         
         // avoiding self ray-query by temporary disabling collision 
         cpShape* shape = body->shapeList;

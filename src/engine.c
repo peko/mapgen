@@ -174,7 +174,6 @@ engine_deinit() {
 	glfwTerminate();
 }
 
-
 void 
 engine_start() {
     while (!glfwWindowShouldClose(window)) {
