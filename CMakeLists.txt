@@ -13,18 +13,25 @@ include_directories(nanovg/src/)
 include_directories(${OPENGL_INCLUDE_DIR})
 include_directories(${GLEW_INCLUDE_DIRS})
 
-add_library(nanovg STATIC 
-    nanovg/src/nanovg.c
-)
 
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/src 
+    ${CMAKE_CURRENT_SOURCE_DIR}/delaunay 
     ${CMAKE_CURRENT_SOURCE_DIR}/Clipper)
+
+add_library(nanovg STATIC 
+    nanovg/src/nanovg.c
+)
 
 add_library(clipper STATIC 
     Clipper/clipper.cpp
     Clipper/clipper_c.cpp
 )
+
+add_library(delaunay STATIC
+    delaunay/delaunay.c
+)
+
 add_executable(clipper_test
     Clipper/clipper_test.cpp
 )
@@ -53,4 +60,6 @@ target_link_libraries(mapgen
     glfw 
     m 
     chipmunk
-    clipper)
+    clipper
+	delaunay
+)

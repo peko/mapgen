@@ -7,6 +7,9 @@
 #include "room.h"
 
 #include "clipper_c.h"
+#include "delaunay.h"
+#include "kvec.h"
+
 
 #define l_space (level->space)
 
@@ -37,26 +40,61 @@ mgLevelFree(mgLevel* level) {
     free(level);
 }
 
-void eachBody(cpBody* body, void* data) {
-    cpArray* a = data;
-    cpVect* p = &body->p;
-    printf("%f, %f\n", p->x, p->y);
+/*  Delaunay
+typedef kvec_t(del_point2d_t) point_v;
+void 
+eachBody(cpBody* body, void* data) {
+    point_v* centers = data;
+    kv_push(
+        del_point2d_t, 
+        *centers, 
+        ((del_point2d_t){body->p.x, body->p.y}));
 }
-
-kvec
 
 void 
 mgLevelUpdate(mgLevel* level, float dt) {
     // cpSpaceStep(l_space, dt);
     cpSpaceStep(l_space, 1.0/60.0);
     //cpArray* points = cpArrayNew();
-    //buildDelaunay(mgLevel* level);
-    cpSpaceEachBody(l_space, eachBody, NULL);
-    // cpBB bb = {0};
-    // cpSpaceEachShape(l_space, eachShape, &bb);
-    // printf("%f %f %f %f\n",  
-    //     bb.l,  bb.r, 
-    //     bb.t,  bb.b); 
+    point_v centers = {0};
+    // iterate over all bodies, collect centers
+    cpSpaceEachBody(l_space, eachBody, &centers);
+    // calculate delaunay
+    delaunay2d_t* delaunay = delaunay2d_from(centers.a, centers.n);
+    unsigned int* faces = delaunay->faces; 
+
+    nvgBeginPath(vg);
+    nvgStrokeWidth(vg, 0.5);
+    nvgStrokeColor(vg, nvgRGBAf(1.0,1.0,1.0,0.5));
+    
+    for(int fid=0; fid<delaunay->num_faces; fid++) {
+        // get counter then inc
+        unsigned int vcnt=*faces++;
+        unsigned int vid =*faces;
+        nvgMoveTo(vg, centers.a[vid].x, centers.a[vid].y);
+        while(vcnt-->0) {
+            // get vid then inc
+            vid = *faces++;
+            nvgLineTo(vg, centers.a[vid].x, centers.a[vid].y);
+        }
+    }
+    nvgStroke(vg);
+    // release resources
+    delaunay2d_release(delaunay);
+    kv_destroy(centers);
+    
+}
+*/
+
+void 
+eachBody(cpBody* body, void* data) {
+}
+
+void 
+mgLevelUpdate(mgLevel* level, float dt) {
+    cpSpaceStep(l_space, 1.0/60.0);
+    // cpSpaceEachBody(l_space, eachBody, &centers);
+    // calculate delaunay
 }
 
 // Move 
@@ -173,5 +211,5 @@ drawKpaths(kpaths_t* paths, NVGcolor c) {
 }
 
 static void buildDelaunay(mgLevel* level) {
-	
+    
 }
