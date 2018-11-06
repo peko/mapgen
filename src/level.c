@@ -9,7 +9,7 @@
 #include "clipper_c.h"
 #include "delaunay.h"
 #include "kvec.h"
-
+#include "khash.h"
 
 #define l_space (level->space)
 
@@ -40,61 +40,89 @@ mgLevelFree(mgLevel* level) {
     free(level);
 }
 
-/*  Delaunay
-typedef kvec_t(del_point2d_t) point_v;
+
+// body link + body center for dellanuay
+typedef struct {
+    kvec_t(cpBody*      ) bodies;
+    kvec_t(del_point2d_t) centers;
+} bodies_v;
+
 void 
 eachBody(cpBody* body, void* data) {
-    point_v* centers = data;
+    bodies_v* bodies = data;
+    kv_push(
+        cpBody*,
+        bodies->bodies,
+        body);
     kv_push(
         del_point2d_t, 
-        *centers, 
+        bodies->centers, 
         ((del_point2d_t){body->p.x, body->p.y}));
 }
 
-void 
-mgLevelUpdate(mgLevel* level, float dt) {
-    // cpSpaceStep(l_space, dt);
-    cpSpaceStep(l_space, 1.0/60.0);
-    //cpArray* points = cpArrayNew();
-    point_v centers = {0};
-    // iterate over all bodies, collect centers
-    cpSpaceEachBody(l_space, eachBody, &centers);
-    // calculate delaunay
-    delaunay2d_t* delaunay = delaunay2d_from(centers.a, centers.n);
-    unsigned int* faces = delaunay->faces; 
 
-    nvgBeginPath(vg);
-    nvgStrokeWidth(vg, 0.5);
-    nvgStrokeColor(vg, nvgRGBAf(1.0,1.0,1.0,0.5));
+// HASH SET with uniq pairs
+KHASH_SET_INIT_INT(uniq);
+
+static void
+addLinkToSet(khash_t(uniq)* s, unsigned int a, unsigned int b) {
+    if(a>b) { 
+        unsigned int t=b; b=a; a=t;
+    }
+    unsigned int v = (a<<16) | b;
+    int absent; kh_put(uniq, s, v, &absent);
+    // printf("%d %d\n", a, b);
+}
+
+void
+mgLevelUpdate(mgLevel* level, float dt) {
+
+    cpSpaceStep(l_space, 1.0/60.0);
+
+    bodies_v bodies ={0};
+    // iterate over all bodies, collect centers
+    cpSpaceEachBody(l_space, eachBody, &bodies);
+
+    // calculate delaunay
+    delaunay2d_t* delaunay = delaunay2d_from(bodies.centers.a, bodies.centers.n);
+    unsigned int* faces = delaunay->faces; 
+    // set of id pairs a-b, where a>b
+    khash_t(uniq)* s = kh_init(uniq);
     
     for(int fid=0; fid<delaunay->num_faces; fid++) {
-        // get counter then inc
         unsigned int vcnt=*faces++;
-        unsigned int vid =*faces;
-        nvgMoveTo(vg, centers.a[vid].x, centers.a[vid].y);
-        while(vcnt-->0) {
-            // get vid then inc
-            vid = *faces++;
-            nvgLineTo(vg, centers.a[vid].x, centers.a[vid].y);
+        unsigned int a, b, f;
+        f = a = *faces++;
+        while(--vcnt>0) {
+            b = *faces++;
+            addLinkToSet(s, a, b);
+            a = b;
+        }
+        addLinkToSet(s, b, f);
+    }
+
+    nvgBeginPath(vg);
+    for(khint_t i=kh_begin(s); i!=kh_end(s); ++i) {
+        if(kh_exist(s, i)) {
+            unsigned int v = kh_key(s, i);
+            unsigned int a, b;
+            a = v >> 16;
+            b = v &  0xFFFF;
+            nvgMoveTo(vg, bodies.centers.a[a].x, bodies.centers.a[a].y);
+            nvgLineTo(vg, bodies.centers.a[b].x, bodies.centers.a[b].y);
+            //printf("%d [%d\t%d]\n", i, a, b);
         }
     }
+    nvgStrokeWidth(vg, 1);
+    nvgStrokeColor(vg, nvgRGBAf(1.0,1.0,1.0,0.2));
     nvgStroke(vg);
+
     // release resources
     delaunay2d_release(delaunay);
-    kv_destroy(centers);
+    kh_destroy(uniq, s);
+    kv_destroy(bodies.centers);
+    kv_destroy(bodies.bodies );
     
-}
-*/
-
-void 
-eachBody(cpBody* body, void* data) {
-}
-
-void 
-mgLevelUpdate(mgLevel* level, float dt) {
-    cpSpaceStep(l_space, 1.0/60.0);
-    // cpSpaceEachBody(l_space, eachBody, &centers);
-    // calculate delaunay
 }
 
 // Move 

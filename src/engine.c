@@ -1,5 +1,6 @@
 #include <stdio.h>
 
+
 #include <chipmunk/chipmunk_private.h>
 
 #include "globals.h"
@@ -128,7 +129,7 @@ engine_init () {
 // 	glfwWindowHint(GLFW_SAMPLES, 4);
 // #endif
 
-	window = glfwCreateWindow(800, 800, "Ants SVM", NULL, NULL);
+	window = glfwCreateWindow(800, 800, "Mapgen", NULL, NULL);
 //	window = glfwCreateWindow(1000, 600, "NanoVG", glfwGetPrimaryMonitor(), NULL);
 	if (!window) {
 		glfwTerminate();
