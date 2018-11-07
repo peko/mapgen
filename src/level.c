@@ -27,13 +27,13 @@ mgLevelNew() {
     l_space = cpSpaceNew();
 
     cpSpaceSetDamping(l_space, SPACE_DAMPING);
-    cpSpaceSetSleepTimeThreshold(l_space, 1);
+    cpSpaceSetSleepTimeThreshold(l_space, 2);
     cpSpaceSetIterations(l_space, 10);
-    for(int i=0; i<40; i++) {
-        roomNew(level, (cpVect){0.0,0.0});
-    }
+    // for(int i=0; i<40; i++) {
+    //    roomNew(level, (cpVect){0.0,0.0});
+    // }
     // Simulate
-    for(int i=0; i<10; i++) cpSpaceStep(l_space, 0.1);
+    // for(int i=0; i<10; i++) cpSpaceStep(l_space, 0.1);
     return level;
 }
 
@@ -85,9 +85,15 @@ mgLevelUpdate(mgLevel* level, float dt) {
     // release resources
     delaunay2d_release(delaunay);
     kv_destroy(centers);
-    
+
 }
 */
+
+void
+mgLevelAddRoom(mgLevel* level) {
+    // roomNew(level, (cpVect){0.0,0.0});
+    createRoom(level);
+}
 
 void 
 eachBody(cpBody* body, void* data) {
@@ -95,10 +101,14 @@ eachBody(cpBody* body, void* data) {
 
 void 
 mgLevelUpdate(mgLevel* level, float dt) {
-    // cpSpaceStep(l_space, 1.0);
+    cpSpaceStep(l_space, 0.1);
     // cpSpaceEachBody(l_space, eachBody, &centers);
     // calculate delaunay
 }
+
+
+// Events
+
 
 // Move 
 

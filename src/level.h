@@ -10,6 +10,8 @@ typedef struct mgLevel {
 mgLevel* mgLevelNew();
 void mgLevelFree(mgLevel* level);
 
+void mgLevelAddRoom(mgLevel* level);
+
 void mgLevelUpdate(mgLevel* level, float dt);
 void mgLevelRender(mgLevel* level);
 

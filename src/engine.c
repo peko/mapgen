@@ -15,9 +15,10 @@
 
 #include "engine.h"
 
-void (*engine_update)(float dt) = NULL;
-void (*engine_render)(float dt) = NULL;
-void (*engine_key)(int key, int action) = NULL;
+void (*engine_update    )(float dt)                        = NULL;
+void (*engine_render    )(float dt)                        = NULL;
+void (*engine_key       )(int key, int action)             = NULL;
+void (*engine_mouseClick)(int button, int action,int mods) = NULL;
 
 void errorcb(int error, const char* desc) {
     printf("GLFW error %d: %s\n", error, desc);
@@ -86,7 +87,12 @@ int dragging = 0;
 double dragX;
 double dragY;
 static void
-mouse(GLFWwindow* win, int button, int action, int mods) {
+mouse(
+    GLFWwindow* win, 
+    int button, 
+    int action, 
+    int mods) {
+    
     if(button == GLFW_MOUSE_BUTTON_LEFT) {
         if (action == GLFW_PRESS) {
             dragging = 1;
@@ -98,6 +104,8 @@ mouse(GLFWwindow* win, int button, int action, int mods) {
             ty += mouseY - dragY;
         }
     }
+
+    if(engine_mouseClick != NULL) engine_mouseClick(button, action, mods);
 }
 
 static void 
