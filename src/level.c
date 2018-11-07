@@ -27,7 +27,7 @@ mgLevelNew() {
     l_space = cpSpaceNew();
 
     cpSpaceSetDamping(l_space, SPACE_DAMPING);
-    for(int i=0; i<40; i++) {
+    for(int i=0; i<20; i++) {
         roomNew(level, (cpVect){0.0,0.0});
     }
 
