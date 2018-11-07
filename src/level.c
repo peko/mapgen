@@ -27,10 +27,13 @@ mgLevelNew() {
     l_space = cpSpaceNew();
 
     cpSpaceSetDamping(l_space, SPACE_DAMPING);
+    cpSpaceSetSleepTimeThreshold(l_space, 1);
+    cpSpaceSetIterations(l_space, 10);
     for(int i=0; i<40; i++) {
         roomNew(level, (cpVect){0.0,0.0});
     }
-
+    // Simulate
+    for(int i=0; i<10; i++) cpSpaceStep(l_space, 0.1);
     return level;
 }
 
@@ -92,7 +95,7 @@ eachBody(cpBody* body, void* data) {
 
 void 
 mgLevelUpdate(mgLevel* level, float dt) {
-    cpSpaceStep(l_space, 1.0/60.0);
+    // cpSpaceStep(l_space, 1.0);
     // cpSpaceEachBody(l_space, eachBody, &centers);
     // calculate delaunay
 }

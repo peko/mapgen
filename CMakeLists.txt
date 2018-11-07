@@ -9,38 +9,37 @@ find_package(GLEW REQUIRED)
 set(CMAKE_C_FLAGS "-g -O0")
 
 add_definitions(-DNANOVG_GL2 -DNANOVG_GLEW)
-include_directories(nanovg/src/)
 include_directories(${OPENGL_INCLUDE_DIR})
 include_directories(${GLEW_INCLUDE_DIRS})
 
 
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/src 
-    ${CMAKE_CURRENT_SOURCE_DIR}/delaunay 
-    ${CMAKE_CURRENT_SOURCE_DIR}/Clipper)
+    ${CMAKE_CURRENT_SOURCE_DIR}/dep/nanovg/src
+    ${CMAKE_CURRENT_SOURCE_DIR}/dep/delaunay 
+    ${CMAKE_CURRENT_SOURCE_DIR}/dep/Clipper)
 
 add_library(nanovg STATIC 
-    nanovg/src/nanovg.c
+    dep/nanovg/src/nanovg.c
 )
 
 add_library(clipper STATIC 
-    Clipper/clipper.cpp
-    Clipper/clipper_c.cpp
+    dep/Clipper/clipper.cpp
+    dep/Clipper/clipper_c.cpp
 )
 
 add_library(delaunay STATIC
-    delaunay/delaunay.c
+    dep/delaunay/delaunay.c
 )
 
-add_executable(clipper_test
-    Clipper/clipper_test.cpp
-)
-target_link_libraries(clipper_test clipper)
-
-add_executable(clipper_c_test
-    Clipper/clipper_c_test.c
-)
-target_link_libraries(clipper_c_test clipper)
+# add_executable(clipper_test
+#     /dep/Clipper/clipper_test.cpp
+# )
+# target_link_libraries(clipper_test clipper)
+# add_executable(clipper_c_test
+#    Clipper/clipper_c_test.c
+# )
+# target_link_libraries(clipper_c_test clipper)
 
  
 add_executable(mapgen
