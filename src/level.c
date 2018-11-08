@@ -18,7 +18,7 @@ extern void spaceDraw(cpSpace* space);
 
 static cpBool onAntCollision(cpArbiter* arb, cpSpace* space, void* data);
 static void drawKpaths(kpaths_t* paths, NVGcolor c);
-static mgRoom* createRoom(mgLevel* level);
+static cpBody* createRoom(mgLevel* level);
 
 mgLevel* 
 mgLevelNew() {
@@ -77,10 +77,8 @@ mgLevelUpdate(mgLevel* level, float dt) {
 
 // Events
 
-
-// Move 
-
-void mgLevelKey(mgLevel* level, int key, int action) {
+void 
+mgLevelKey(mgLevel* level, int key, int action) {
     if(key==32 && action == 1) createRoom(level);
 }
 
@@ -98,49 +96,24 @@ RGBAColor(float r, float g, float b, float a){
 }
 
 
-static mgRoom* 
+static cpBody* 
 createRoom(mgLevel* level) { 
+    cpBody*  body;
+    cpShape* shape;
 
     cpFloat size = 30.0;
     cpFloat mass =  1.0;
 
     int w = rand()%10*4+40;
     int h = rand()%10*4+40;
+    body = cpSpaceAddBody(l_space, cpBodyNew(mass, cpMomentForBox(mass, w, h)));
+    cpBodySetPosition(body, cpv(rand()%WIDTH, rand()%HEIGHT));    
     
-    mgRoom* room = cpcalloc(1, sizeof(mgRoom));
-    cpBody* body = (cpBody*)room;
-    cpBodyInit(body, mass, cpMomentForBox(mass, w, h));    
-    cpBodySetPosition(body, cpv(rand()%WIDTH, rand()%HEIGHT));
-    cpShape* shape = cpSpaceAddShape(l_space, cpBoxShapeNew(body, w, h, 5.0));
+    shape = cpSpaceAddShape(l_space, cpBoxShapeNew(body, w, h, 5.0));
+    //cpShapeSetElasticity(shape, 0.0f);
+    //cpShapeSetFriction(shape, 0.7f);
+    //cpShapeSetCollisionType(shape, BOX);
 
-    return room;
-}
-
-static void 
-clipping(mgLevel* level) {
-    /*
-    kaths_t* map  = kpaths_new();
-    kaths_t* subj = kpaths_new();
-    kaths_t* clip = kpaths_new();
-    {
-        // no need to free, automaticaly cleared by kpaths_free
-        kpath_t* subj_path = kpaths_add_new_path(level->subj);
-        kpath_t* clip_path = kpaths_add_new_path(level->clip);
-        int n = 64;
-        for(size_t i=0; i<n; i++) {
-            kpoint_t p = {
-                400+300.0*cos(i/(float)n*3.141*2.0*3),
-                400+300.0*sin(i/(float)n*3.141*2.0*5)};
-            kpath_add_point(subj_path, &p);            
-            p = (kpoint_t){
-                400+300.0*cos(i/(float)n*3.141*2.0*5),
-                400+300.0*sin(i/(float)n*3.141*2.0*3)};
-            kpath_add_point(clip_path, &p);
-        }
-        clipp_kpaths(level->subj, level->clip, level->map);
-        printf("Clippig result:\n");
-        kpaths_print(level->map);
-    }
-    */
+    return body;
 }
 
