@@ -9,25 +9,25 @@
 #include "clipper_c.h"
 #include "delaunay.h"
 #include "kvec.h"
-#include "khash.h"
 
 #define l_space (level->space)
+#define l_links (*level->links)
 
 extern NVGcontext* vg;
 extern void spaceDraw(cpSpace* space);
 
 static cpBool onAntCollision(cpArbiter* arb, cpSpace* space, void* data);
 static void drawKpaths(kpaths_t* paths, NVGcolor c);
-static cpBody* createRoom(mgLevel* level);
+static mgRoom* createRoom(mgLevel* level);
 
 mgLevel* 
 mgLevelNew() {
 
     mgLevel* level = calloc(sizeof(mgLevel), 1);
     l_space = cpSpaceNew();
-
+    
     cpSpaceSetDamping(l_space, SPACE_DAMPING);
-    cpSpaceSetSleepTimeThreshold(l_space, 2);
+    //cpSpaceSetSleepTimeThreshold(l_space, 2);
     cpSpaceSetIterations(l_space, 10);
     // for(int i=0; i<40; i++) {
     //    roomNew(level, (cpVect){0.0,0.0});
@@ -43,36 +43,35 @@ mgLevelFree(mgLevel* level) {
     free(level);
 }
 
-
-void 
-eachBody(cpBody* body, void* data) {
-}
-
-
-// HASH SET with uniq pairs
-KHASH_SET_INIT_INT(uniq);
-
-static void
-addLinkToSet(khash_t(uniq)* s, unsigned int a, unsigned int b) {
-    if(a>b) { 
-        unsigned int t=b; b=a; a=t;
-    }
-    unsigned int v = (a<<16) | b;
-    int absent; kh_put(uniq, s, v, &absent);
-    // printf("%d %d\n", a, b);
-}
-
 void
 mgLevelAddRoom(mgLevel* level) {
     // roomNew(level, (cpVect){0.0,0.0});
     createRoom(level);
 }
 
+
 void 
 mgLevelUpdate(mgLevel* level, float dt) {
     cpSpaceStep(l_space, 0.1);
-    // cpSpaceEachBody(l_space, eachBody, &centers);
-    // calculate delaunay
+    cpSpaceLock(l_space); {
+
+        // Run over all bodies and link with near
+        cpArray *bodies = l_space->dynamicBodies;
+        for(int i=0; i<bodies->num; i++){
+            cpBody* b = bodies->arr[i];
+                  
+            cpShapeFilter filter = {1, CP_ALL_CATEGORIES, CP_ALL_CATEGORIES};
+            // put self to fitler group 1, to ignore in query
+            b->shapeList[0].filter = filter;
+            // shape point disntace gradient    
+            cpPointQueryInfo out = {0};
+            cpSpacePointQueryNearest(l_space, b->p, 1000.0, filter, &out);
+            printf("%d\n", out.shape);
+
+            // return self to no group
+            b->shapeList[0].filter = (cpShapeFilter){CP_NO_GROUP, CP_ALL_CATEGORIES, CP_ALL_CATEGORIES};
+        }
+    } cpSpaceUnlock(l_space, cpTrue);
 }
 
 
@@ -99,25 +98,22 @@ RGBAColor(float r, float g, float b, float a){
 }
 
 
-static cpBody* 
+static mgRoom* 
 createRoom(mgLevel* level) { 
-    cpBody*  body;
-    cpShape* shape;
 
     cpFloat size = 30.0;
     cpFloat mass =  1.0;
 
     int w = rand()%10*4+40;
     int h = rand()%10*4+40;
-    body = cpSpaceAddBody(l_space, cpBodyNew(mass, cpMomentForBox(mass, w, h)));
-    cpBodySetPosition(body, cpv(rand()%WIDTH, rand()%HEIGHT));    
+    
+    mgRoom* room = cpcalloc(1, sizeof(mgRoom));
+    cpBody* body = (cpBody*)room;
+    cpBodyInit(body, mass, cpMomentForBox(mass, w, h));    
+    cpBodySetPosition(body, cpv(rand()%WIDTH, rand()%HEIGHT));
+    cpShape* shape = cpSpaceAddShape(l_space, cpBoxShapeNew(body, w, h, 5.0));
 
-    shape = cpSpaceAddShape(l_space, cpBoxShapeNew(body, w, h, 5.0));
-    //cpShapeSetElasticity(shape, 0.0f);
-    //cpShapeSetFriction(shape, 0.7f);
-    //cpShapeSetCollisionType(shape, BOX);
-
-    return body;
+    return room;
 }
 
 static void 
@@ -146,33 +142,5 @@ clipping(mgLevel* level) {
         kpaths_print(level->map);
     }
     */
-}
-
-static inline void 
-drawVector(double x, double y, double dx, double dy, NVGcolor c) {
-    nvgBeginPath(vg);
-    nvgMoveTo(vg, x, y);
-    nvgLineTo(vg, x+dx, y+dy);
-    nvgStrokeColor(vg, c);
-    nvgStroke(vg);
-}
-
-static void
-drawKpaths(kpaths_t* paths, NVGcolor c) {
-    if(paths == 0) return;
-    nvgStrokeWidth(vg, 1.0);
-    nvgStrokeColor(vg, c);
-    nvgFillColor(vg, c);
-    for(size_t i=0; i<paths->n; i++) {
-        kpath_t* p = &paths->a[i];
-        nvgBeginPath(vg);
-        nvgMoveTo(vg, p->a[0].x, p->a[0].y);
-        for(size_t j=1; j<p->n; j++) {
-            nvgLineTo(vg, p->a[j].x, p->a[j].y);
-        }
-        nvgLineTo(vg, p->a[0].x, p->a[0].y);
-        nvgFill(vg);
-        nvgStroke(vg);
-    }
 }
 
