@@ -2,17 +2,19 @@
 
 #include "globals.h"
 
+typedef struct mgRoom mgRoom;
+
+typedef kvec_t(mgRoom*) mgRoomVec;
+
 typedef struct mgLevel mgLevel;
-typedef struct tunnel_t tunnel_t;
+typedef struct mgRoom {
+    struct cpBody;
+    mgRoomVec links;
+} mgRoom;
 
-typedef struct room_t {
-    cpVect*  pos;
-    cpBody*  body;
-    cpShape* shape;
-    cpFloat  w, h;
-} room_t;
-
-room_t* roomNew(mgLevel* level, cpVect pos);
-void roomFree(room_t* room);
-
-tunnel_t* roomsConnect(mgLevel* level, room_t* a, room_t* b);
+mgRoom* mgRoomAlloc(void);
+mgRoom* mgRoomInit(mgRoom* room, mgLevel* level, cpVect pos);
+mgRoom* mgRoomNew(mgLevel* level, cpVect pos);
+void    mgRoomDestroy(mgRoom* room);
+void    mgRoomFree(mgRoom* room);
+void    mgRoomLinkTogether(mgRoom* a, mgRoom* b);

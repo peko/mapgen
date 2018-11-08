@@ -48,7 +48,6 @@ add_executable(mapgen
     src/utils.c 
     src/level.c
     src/room.c
-    src/tunnel.c
 )
 
 target_link_libraries(mapgen 
