@@ -16,12 +16,13 @@
 
 #include "engine.h"
 
-void (*engine_update)(float dt) = NULL;
-void (*engine_render)(float dt) = NULL;
-void (*engine_key)(int key, int action) = NULL;
+void (*engine_update    )(float dt)                        = NULL;
+void (*engine_render    )(float dt)                        = NULL;
+void (*engine_key       )(int key, int action)             = NULL;
+void (*engine_mouseClick)(int button, int action,int mods) = NULL;
 
 void errorcb(int error, const char* desc) {
-	printf("GLFW error %d: %s\n", error, desc);
+    printf("GLFW error %d: %s\n", error, desc);
 }
 
 int blowup  = 0;
@@ -43,33 +44,33 @@ key(
     int action, 
     int mods) {
         
-	NVG_NOTUSED(scancode);
-	NVG_NOTUSED(mods);
-	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS){
-		glfwSetWindowShouldClose(window, GL_TRUE);
-	}
+    NVG_NOTUSED(scancode);
+    NVG_NOTUSED(mods);
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS){
+        glfwSetWindowShouldClose(window, GL_TRUE);
+    }
 
-	if (key == GLFW_KEY_KP_SUBTRACT && action == GLFW_PRESS){
-		zoom /= 1.1;
-	}
+    if (key == GLFW_KEY_KP_SUBTRACT && action == GLFW_PRESS){
+        zoom /= 1.1;
+    }
 
-	if (key == GLFW_KEY_KP_ADD && action == GLFW_PRESS){
-		zoom *= 1.1;		
-	}
-	
-	if (key == GLFW_KEY_KP_4 && action == GLFW_PRESS){
-		tx+=50.0;
-	}
-	if (key == GLFW_KEY_KP_6 && action == GLFW_PRESS){
-		tx-=50.0;
-	}
-	if (key == GLFW_KEY_KP_8 && action == GLFW_PRESS){
-		ty+=50.0;
-	}
-	if (key == GLFW_KEY_KP_5 && action == GLFW_PRESS){
-		ty-=50.0;
-	}
-	
+    if (key == GLFW_KEY_KP_ADD && action == GLFW_PRESS){
+        zoom *= 1.1;        
+    }
+    
+    if (key == GLFW_KEY_KP_4 && action == GLFW_PRESS){
+        tx+=50.0;
+    }
+    if (key == GLFW_KEY_KP_6 && action == GLFW_PRESS){
+        tx-=50.0;
+    }
+    if (key == GLFW_KEY_KP_8 && action == GLFW_PRESS){
+        ty+=50.0;
+    }
+    if (key == GLFW_KEY_KP_5 && action == GLFW_PRESS){
+        ty-=50.0;
+    }
+    
     if(engine_key!=NULL) engine_key(key, action);
 }
 
@@ -87,18 +88,25 @@ int dragging = 0;
 double dragX;
 double dragY;
 static void
-mouse(GLFWwindow* win, int button, int action, int mods) {
+mouse(
+    GLFWwindow* win, 
+    int button, 
+    int action, 
+    int mods) {
+    
     if(button == GLFW_MOUSE_BUTTON_LEFT) {
         if (action == GLFW_PRESS) {
-       		dragging = 1;
-       		dragX = mouseX;
-       		dragY = mouseY;
+            dragging = 1;
+            dragX = mouseX;
+            dragY = mouseY;
         } else if(action == GLFW_RELEASE) {
             dragging = 0;
             tx += mouseX - dragX;
             ty += mouseY - dragY;
         }
     }
+
+    if(engine_mouseClick != NULL) engine_mouseClick(button, action, mods);
 }
 
 static void 
@@ -106,7 +114,7 @@ scroll(GLFWwindow* win, double dx, double dy){
     float k = dy>0.0 ? 1.5 : 1.0/1.5;
     tx = k*(tx-mouseX)+mouseX;
     ty = k*(ty-mouseY)+mouseY;
-	zoom*=k;		
+    zoom*=k;        
 }
 
 static void DrawCursor();
@@ -115,116 +123,116 @@ static void DrawCursor();
 int 
 engine_init () {
 
-	if (!glfwInit()) {
-		printf("Failed to init GLFW.");
-		return -1;
-	}
+    if (!glfwInit()) {
+        printf("Failed to init GLFW.");
+        return -1;
+    }
 
-	glfwSetErrorCallback(errorcb);
+    glfwSetErrorCallback(errorcb);
 
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 
 // #ifdef DEMO_MSAA
-// 	glfwWindowHint(GLFW_SAMPLES, 4);
+//  glfwWindowHint(GLFW_SAMPLES, 4);
 // #endif
 
-	window = glfwCreateWindow(800, 800, "Mapgen", NULL, NULL);
-//	window = glfwCreateWindow(1000, 600, "NanoVG", glfwGetPrimaryMonitor(), NULL);
-	if (!window) {
-		glfwTerminate();
-		return -1;
-	}
+    window = glfwCreateWindow(800, 800, "mapgen", NULL, NULL);
+//  window = glfwCreateWindow(1000, 600, "NanoVG", glfwGetPrimaryMonitor(), NULL);
+    if (!window) {
+        glfwTerminate();
+        return -1;
+    }
 
     // callbacks
-	glfwSetKeyCallback         (window, key   );
-	glfwSetCursorPosCallback   (window, cursor);
-	glfwSetScrollCallback      (window, scroll);
-	glfwSetMouseButtonCallback (window, mouse );
+    glfwSetKeyCallback         (window, key   );
+    glfwSetCursorPosCallback   (window, cursor);
+    glfwSetScrollCallback      (window, scroll);
+    glfwSetMouseButtonCallback (window, mouse );
 
-	glfwMakeContextCurrent(window);
+    glfwMakeContextCurrent(window);
 #ifdef NANOVG_GLEW
     if(glewInit() != GLEW_OK) {
-		printf("Could not init glew.\n");
-		return -1;
-	}
+        printf("Could not init glew.\n");
+        return -1;
+    }
 #endif
 
 #ifdef DEMO_MSAA
-	vg = nvgCreateGL2(NVG_STENCIL_STROKES | NVG_DEBUG);
+    vg = nvgCreateGL2(NVG_STENCIL_STROKES | NVG_DEBUG);
 #else
-	vg = nvgCreateGL2(NVG_ANTIALIAS | NVG_STENCIL_STROKES | NVG_DEBUG);
+    vg = nvgCreateGL2(NVG_ANTIALIAS | NVG_STENCIL_STROKES | NVG_DEBUG);
 #endif
-	if (vg == NULL) {
-		printf("Could not init nanovg.\n");
-		return -1;
-	}
+    if (vg == NULL) {
+        printf("Could not init nanovg.\n");
+        return -1;
+    }
     font = nvgCreateFont(vg, "sans", "Roboto-Regular.ttf");
-	//glfwSwapInterval(0);
+    //glfwSwapInterval(0);
 
-	glfwSetTime(0);
-	prevt = glfwGetTime();
+    glfwSetTime(0);
+    prevt = glfwGetTime();
 
-	return 0;
+    return 0;
 }
 
 void 
 engine_deinit() {
-	nvgDeleteGL2(vg);
+    nvgDeleteGL2(vg);
     glfwDestroyWindow(window);
-	glfwTerminate();
+    glfwTerminate();
 }
 
 void 
 engine_start() {
     while (!glfwWindowShouldClose(window)) {
-		double mx, my, t, dt;
-		int winWidth, winHeight;
-		int fbWidth, fbHeight;
-		float pxRatio;
+        double mx, my, t, dt;
+        int winWidth, winHeight;
+        int fbWidth, fbHeight;
+        float pxRatio;
 
-		t = glfwGetTime();
-		dt = t - prevt;
-		prevt = t;
+        t = glfwGetTime();
+        dt = t - prevt;
+        prevt = t;
           
-		if(engine_update!=NULL) engine_update(dt);
-		
-		glfwGetCursorPos(window, &mx, &my);
-		glfwGetWindowSize(window, &winWidth, &winHeight);
-		glfwGetFramebufferSize(window, &fbWidth, &fbHeight);
+        if(engine_update!=NULL) engine_update(dt);
+        
+        glfwGetCursorPos(window, &mx, &my);
+        glfwGetWindowSize(window, &winWidth, &winHeight);
+        glfwGetFramebufferSize(window, &fbWidth, &fbHeight);
 
-		// Calculate pixel ration for hi-dpi devices.
-		pxRatio = (float)fbWidth / (float)winWidth;
+        // Calculate pixel ration for hi-dpi devices.
+        pxRatio = (float)fbWidth / (float)winWidth;
 
-		// Update and render
-		glViewport(0, 0, fbWidth, fbHeight);
-		if (premult) glClearColor(0,0,0,0);
-		else glClearColor(0.3f, 0.3f, 0.32f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
+        // Update and render
+        glViewport(0, 0, fbWidth, fbHeight);
+        if (premult) glClearColor(0,0,0,0);
+        else glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
 
-		nvgBeginFrame(vg, winWidth, winHeight, pxRatio);
-		// nvgFontSize(vg, 20.0);
-		// nvgFontFace(vg, "sans");
-		// nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
+        nvgBeginFrame(vg, winWidth, winHeight, pxRatio);
+        // nvgFontSize(vg, 20.0);
+        // nvgFontFace(vg, "sans");
+        // nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
 
         // char fps[32];
         // sprintf(fps, "%4.1f fps", 1.0/dt);
-		// nvgText(vg, 10.0, 10.0, fps, NULL);
+        // nvgText(vg, 10.0, 10.0, fps, NULL);
         nvgSave(vg);
         if (dragging) {
-        	nvgTransform(vg, zoom, 0.0, 0.0, zoom, tx-dragX+mouseX, ty-dragY+mouseY);
+            nvgTransform(vg, zoom, 0.0, 0.0, zoom, tx-dragX+mouseX, ty-dragY+mouseY);
         } else {
-        	nvgTransform(vg, zoom, 0.0, 0.0, zoom, tx, ty);
+            nvgTransform(vg, zoom, 0.0, 0.0, zoom, tx, ty);
         }
         if(engine_render!=NULL) engine_render(dt);
         nvgRestore(vg);
 
         DrawCursor();
-		nvgEndFrame(vg);
-	
-		glfwSwapBuffers(window);
-		glfwPollEvents();
-	}
+        nvgEndFrame(vg);
+    
+        glfwSwapBuffers(window);
+        glfwPollEvents();
+    }
 }
 
 
@@ -301,7 +309,7 @@ DrawPolygon(
         nvgLineTo(vg, verts[i].x, verts[i].y);
     }
     nvgLineTo(vg, verts[0].x, verts[0].y);
-    nvgStrokeColor(vg, nvgRGBAf(outlineColor.r, outlineColor.g, outlineColor.b, outlineColor.a));
+    nvgStrokeColor(vg, nvgRGBAf(fillColor.r, fillColor.g, fillColor.b, fillColor.a));
     nvgStrokeWidth(vg, 1.0/zoom);
     nvgStroke(vg);
 };
@@ -339,78 +347,77 @@ DrawCursor() {
 
 static inline cpSpaceDebugColor 
 RGBAColor(float r, float g, float b, float a){
-	cpSpaceDebugColor color = {r, g, b, a};
-	return color;
+    cpSpaceDebugColor color = {r, g, b, a};
+    return color;
 }
 
 static inline cpSpaceDebugColor 
 LAColor(float l, float a){
-	cpSpaceDebugColor color = {l, l, l, a};
-	return color;
+    cpSpaceDebugColor color = {l, l, l, a};
+    return color;
 }
 
 static cpSpaceDebugColor
 ColorForShape(cpShape *shape, cpDataPointer data) {
-	if(cpShapeGetSensor(shape)){
-		return LAColor(1.0f, 0.1f);
-	} else {
-		cpBody *body = cpShapeGetBody(shape);
-		
-		if(cpBodyIsSleeping(body)){
-			return LAColor(0.2f, 1.0f);
-		} else if(body->sleeping.idleTime > shape->space->sleepTimeThreshold) {
-			return LAColor(0.66f, 1.0f);
-		} else {
-			uint32_t val = (uint32_t)shape->hashid;
-			
-			// scramble the bits up using Robert Jenkins' 32 bit integer hash function
-			val = (val+0x7ed55d16) + (val<<12);
-			val = (val^0xc761c23c) ^ (val>>19);
-			val = (val+0x165667b1) + (val<<5);
-			val = (val+0xd3a2646c) ^ (val<<9);
-			val = (val+0xfd7046c5) + (val<<3);
-			val = (val^0xb55a4f09) ^ (val>>16);
-			
-			float r = (float)((val>>0) & 0xFF);
-			float g = (float)((val>>8) & 0xFF);
-			float b = (float)((val>>16) & 0xFF);
-			
-			float max = (float)cpfmax(cpfmax(r, g), b);
-			float min = (float)cpfmin(cpfmin(r, g), b);
-			float intensity = (cpBodyGetType(body) == CP_BODY_TYPE_STATIC ? 0.15f : 0.75f);
-			
-			// Saturate and scale the color
-			if(min == max){
-				return RGBAColor(intensity, 0.0f, 0.0f, 1.0f);
-			} else {
-				float coef = (float)intensity/(max - min);
-				return RGBAColor(
-					(r - min)*coef,
-					(g - min)*coef,
-					(b - min)*coef,
-					1.0f
-				);
-			}
-		}
-	}
+    if(cpShapeGetSensor(shape)){
+        return LAColor(1.0f, 0.1f);
+    } else {
+        cpBody *body = cpShapeGetBody(shape);
+        if(cpBodyIsSleeping(body)){
+            return LAColor(0.2f, 1.0f);
+        } else if(body->sleeping.idleTime > shape->space->sleepTimeThreshold) {
+            return LAColor(0.66f, 1.0f);
+        } else {
+            uint32_t val = (uint32_t)shape->hashid;
+            
+            // scramble the bits up using Robert Jenkins' 32 bit integer hash function
+            val = (val+0x7ed55d16) + (val<<12);
+            val = (val^0xc761c23c) ^ (val>>19);
+            val = (val+0x165667b1) + (val<<5);
+            val = (val+0xd3a2646c) ^ (val<<9);
+            val = (val+0xfd7046c5) + (val<<3);
+            val = (val^0xb55a4f09) ^ (val>>16);
+            
+            float r = (float)((val>>0) & 0xFF);
+            float g = (float)((val>>8) & 0xFF);
+            float b = (float)((val>>16) & 0xFF);
+            
+            float max = (float)cpfmax(cpfmax(r, g), b);
+            float min = (float)cpfmin(cpfmin(r, g), b);
+            float intensity = (cpBodyGetType(body) == CP_BODY_TYPE_STATIC ? 0.15f : 0.75f);
+            
+            // Saturate and scale the color
+            if(min == max){
+                return RGBAColor(intensity, 0.0f, 0.0f, 1.0f);
+            } else {
+                float coef = (float)intensity/(max - min);
+                return RGBAColor(
+                    (r - min)*coef,
+                    (g - min)*coef,
+                    (b - min)*coef,
+                    1.0f
+                );
+            }
+        }
+    }
 }
 
 static cpSpaceDebugDrawOptions drawOptions = {
-	DrawCircle,
-	DrawSegment,
-	DrawFatSegment,
-	DrawPolygon,
-	DrawDot,
-	
-	(cpSpaceDebugDrawFlags)(CP_SPACE_DEBUG_DRAW_SHAPES | CP_SPACE_DEBUG_DRAW_CONSTRAINTS | CP_SPACE_DEBUG_DRAW_COLLISION_POINTS),
-	
-	{200.0f/255.0f, 210.0f/255.0f, 230.0f/255.0f, 1.0f},
-	ColorForShape,
-	{0.0f, 0.75f, 0.0f, 1.0f},
-	{1.0f, 0.0f, 0.0f, 1.0f},
-	NULL,
+    DrawCircle,
+    DrawSegment,
+    DrawFatSegment,
+    DrawPolygon,
+    DrawDot,
+    
+    (cpSpaceDebugDrawFlags)(CP_SPACE_DEBUG_DRAW_SHAPES | CP_SPACE_DEBUG_DRAW_CONSTRAINTS | CP_SPACE_DEBUG_DRAW_COLLISION_POINTS),
+    
+    {200.0f/255.0f, 210.0f/255.0f, 230.0f/255.0f, 1.0f},
+    ColorForShape,
+    {0.0f, 0.75f, 0.0f, 1.0f},
+    {1.0f, 0.0f, 0.0f, 1.0f},
+    NULL,
 };
 
 void spaceDraw(cpSpace* space) {
-	cpSpaceDebugDraw(space, &drawOptions);
+    cpSpaceDebugDraw(space, &drawOptions);
 }

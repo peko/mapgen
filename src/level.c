@@ -27,10 +27,13 @@ mgLevelNew() {
     l_space = cpSpaceNew();
 
     cpSpaceSetDamping(l_space, SPACE_DAMPING);
-    for(int i=0; i<20; i++) {
-        roomNew(level, (cpVect){0.0,0.0});
-    }
-
+    cpSpaceSetSleepTimeThreshold(l_space, 2);
+    cpSpaceSetIterations(l_space, 10);
+    // for(int i=0; i<40; i++) {
+    //    roomNew(level, (cpVect){0.0,0.0});
+    // }
+    // Simulate
+    // for(int i=0; i<10; i++) cpSpaceStep(l_space, 0.1);
     return level;
 }
 
@@ -41,23 +44,8 @@ mgLevelFree(mgLevel* level) {
 }
 
 
-// body link + body center for dellanuay
-typedef struct {
-    kvec_t(cpBody*      ) bodies;
-    kvec_t(del_point2d_t) centers;
-} bodies_v;
-
 void 
 eachBody(cpBody* body, void* data) {
-    bodies_v* bodies = data;
-    kv_push(
-        cpBody*,
-        bodies->bodies,
-        body);
-    kv_push(
-        del_point2d_t, 
-        bodies->centers, 
-        ((del_point2d_t){body->p.x, body->p.y}));
 }
 
 
@@ -75,77 +63,27 @@ addLinkToSet(khash_t(uniq)* s, unsigned int a, unsigned int b) {
 }
 
 void
-mgLevelUpdate(mgLevel* level, float dt) {
-
-    cpSpaceStep(l_space, 1.0/60.0);
-
-    bodies_v bodies ={0};
-    // iterate over all bodies, collect centers
-    cpSpaceEachBody(l_space, eachBody, &bodies);
-
-    // calculate delaunay
-    delaunay2d_t* delaunay = delaunay2d_from(bodies.centers.a, bodies.centers.n);
-    unsigned int* faces = delaunay->faces; 
-    // set of id pairs a-b, where a>b
-    khash_t(uniq)* s = kh_init(uniq);
-    
-    for(int fid=0; fid<delaunay->num_faces; fid++) {
-        unsigned int vcnt=*faces++;
-        unsigned int a, b, f;
-        f = a = *faces++;
-        while(--vcnt>0) {
-            b = *faces++;
-            addLinkToSet(s, a, b);
-            a = b;
-        }
-        addLinkToSet(s, b, f);
-    }
-
-    nvgBeginPath(vg);
-    for(khint_t i=kh_begin(s); i!=kh_end(s); ++i) {
-        if(kh_exist(s, i)) {
-            unsigned int v = kh_key(s, i);
-            unsigned int a, b;
-            a = v >> 16;
-            b = v &  0xFFFF;
-            nvgMoveTo(vg, bodies.centers.a[a].x, bodies.centers.a[a].y);
-            nvgLineTo(vg, bodies.centers.a[b].x, bodies.centers.a[b].y);
-            //printf("%d [%d\t%d]\n", i, a, b);
-        }
-    }
-    nvgStrokeWidth(vg, 1);
-    nvgStrokeColor(vg, nvgRGBAf(1.0,1.0,1.0,0.2));
-    nvgStroke(vg);
-
-    // release resources
-    delaunay2d_release(delaunay);
-    kh_destroy(uniq, s);
-    kv_destroy(bodies.centers);
-    kv_destroy(bodies.bodies );
-    
+mgLevelAddRoom(mgLevel* level) {
+    // roomNew(level, (cpVect){0.0,0.0});
+    createRoom(level);
 }
+
+void 
+mgLevelUpdate(mgLevel* level, float dt) {
+    cpSpaceStep(l_space, 0.1);
+    // cpSpaceEachBody(l_space, eachBody, &centers);
+    // calculate delaunay
+}
+
+
+// Events
+
 
 // Move 
 
-void 
-mgLevelUp(mgLevel* level){
-
-};
-
-void
-mgLevelDown(mgLevel* level){
-
-};
-
-void
-mgLevelLeft(mgLevel* level){
-
-};
-
-void
-mgLevelRight(mgLevel* level){
-
-};
+void mgLevelKey(mgLevel* level, int key, int action) {
+    if(key==32 && action == 1) createRoom(level);
+}
 
 void 
 mgLevelRender(mgLevel* level) {
@@ -238,6 +176,3 @@ drawKpaths(kpaths_t* paths, NVGcolor c) {
     }
 }
 
-static void buildDelaunay(mgLevel* level) {
-    
-}
