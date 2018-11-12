@@ -8,6 +8,7 @@ typedef struct mgRoom mgRoom;
 typedef struct mgLink {
     mgRoom* a;
     mgRoom* b;
+    float length;
 } mgLink;
 
 typedef kvec_t(mgLink) mgLinkVec;

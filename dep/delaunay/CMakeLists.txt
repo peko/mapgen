@@ -10,7 +10,7 @@ endif()
 
 add_library(
     delaunay
-    SHARED
+    STATIC
     delaunay.c
     delaunay.h
     )

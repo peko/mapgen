@@ -13,6 +13,8 @@
 extern NVGcontext* vg;
 extern void spaceDraw(cpSpace* space);
 
+////////////////////////////////////////////////////////////////////////////////
+
 mgLevel*
 mgLevelAlloc(void) {
     return cpcalloc(1, sizeof(mgLevel)); 
@@ -46,11 +48,14 @@ mgLevelFree(mgLevel* level) {
      }
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
 void
 mgLevelCreateRandomRoom(mgLevel* level) {
     mgRoomNew(level, 
         cpv(rand()%80*10, rand()%80*10), 
         cpv(rand()%10*10+40, rand()%10*10+40));
+    mgLevelLinkAllRooms(level);
 }
 
 void 
@@ -87,30 +92,45 @@ mgLevelLinkAllRooms(mgLevel* level) {
             // body a
             cpBody* a = bodies->arr[i];
             cpShapeFilter filter = {1, CP_ALL_CATEGORIES, CP_ALL_CATEGORIES};
-            // put self to fitler group 1, to ignore in query
             a->shapeList[0].filter = filter;
-            // shape point disntace gradient    
-            cpPointQueryInfo out = {0};
-            cpSpacePointQueryNearest(space, a->p, 1000.0, filter, &out);
-            cpBody* b = out.shape->body;
-
-            mgLevelLinkTwoRooms(level, (mgRoom*)a, (mgRoom*)b);
-            
-            // return self to no group
+            {
+                // shape point disntace gradient    
+                cpPointQueryInfo out = {0};
+                cpSpacePointQueryNearest(space, a->p, 1000.0, filter, &out);
+                if(out.shape != NULL) {
+                    cpBody* b = out.shape->body;
+                    mgLevelLinkTwoRooms(level, (mgRoom*)a, (mgRoom*)b);
+                }
+            }
             a->shapeList[0].filter = (cpShapeFilter){CP_NO_GROUP, CP_ALL_CATEGORIES, CP_ALL_CATEGORIES};
         }
     } cpSpaceUnlock(space, cpTrue);
 }
-
-// Events
 
 void 
 mgLevelKey(mgLevel* level, int key, int action) {
     if(key==32 && action == 1) mgLevelCreateRandomRoom(level);
 }
 
+void
+mgLevelDrawLinks(mgLevel* level) {
+    nvgBeginPath(vg);
+    for(int i=0; i<level->links.n; i++) {
+        mgLink* l = &level->links.a[i];
+        mgRoom* a = l->a;
+        mgRoom* b = l->b;
+        nvgMoveTo(vg, a->p.x, a->p.y);
+        nvgLineTo(vg, b->p.x, b->p.y);
+    }
+    nvgStrokeColor(vg, nvgRGBf(0.2, 0.2, 0.2));
+    nvgStrokeWidth(vg, 1.0);
+    nvgStroke(vg);
+    nvgClosePath(vg);
+}
+
 void 
 mgLevelRender(mgLevel* level) {
     spaceDraw((cpSpace*)level);
+    mgLevelDrawLinks(level);
 }
 
