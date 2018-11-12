@@ -1,8 +1,5 @@
 #pragma once
 
-#include <chipmunk/chipmunk_private.h>
-#include "kvec.h"
-
 #define WIDTH  800
 #define HEIGHT 800
 

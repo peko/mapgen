@@ -2,9 +2,10 @@
 #include <stdio.h>
 
 #include "globals.h"
+#include "primitives.h"
 #include "nanovg.h"
-#include "level.h"
-#include "room.h"
+#include "mgLevel.h"
+#include "mgRoom.h"
 
 #include "clipper_c.h"
 #include "delaunay.h"

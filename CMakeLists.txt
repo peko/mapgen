@@ -44,8 +44,8 @@ add_executable(mapgen
     src/mapgen.c
     src/engine.c
     src/utils.c 
-    src/level.c
-    src/room.c
+    src/mgLevel.c
+    src/mgRoom.c
 )
 
 target_link_libraries(mapgen 

@@ -1,0 +1,5 @@
+#pagma once
+
+extern "C" {
+
+}

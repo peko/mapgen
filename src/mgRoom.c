@@ -1,6 +1,7 @@
-#include "room.h"
-#include "level.h"
 #include "globals.h"
+#include "primitives.h"
+#include "mgRoom.h"
+#include "mgLevel.h"
 
 mgRoom*
 mgRoomAlloc(void) {

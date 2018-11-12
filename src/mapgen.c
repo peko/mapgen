@@ -2,7 +2,7 @@
 #include <GLFW/glfw3.h>
 
 #include "engine.h"
-#include "level.h"
+#include "mgLevel.h"
 
 mgLevel* level = NULL;
 
