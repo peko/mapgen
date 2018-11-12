@@ -1,5 +1,0 @@
-#pagma once
-
-extern "C" {
-
-}
