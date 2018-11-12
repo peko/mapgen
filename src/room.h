@@ -13,8 +13,9 @@ typedef struct mgRoom {
 } mgRoom;
 
 mgRoom* mgRoomAlloc(void);
-mgRoom* mgRoomInit(mgRoom* room, mgLevel* level, cpVect pos);
-mgRoom* mgRoomNew(mgLevel* level, cpVect pos);
+mgRoom* mgRoomInit(mgRoom* room, mgLevel* level, cpVect pos, cpVect size);
+mgRoom* mgRoomNew(mgLevel* level, cpVect pos, cpVect size);
 void    mgRoomDestroy(mgRoom* room);
 void    mgRoomFree(mgRoom* room);
 void    mgRoomLinkTogether(mgRoom* a, mgRoom* b);
+void    mgRoomClearLinks(mgRoom* room);

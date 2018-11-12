@@ -4,27 +4,30 @@
 #include "kvec.h"
 #include "clipper_c.h"
 
-typedef struct {
-    cpBody* a;
-    cpBody* b;
-} link_t;
+typedef struct mgRoom mgRoom;
+typedef struct mgLink {
+    mgRoom* a;
+    mgRoom* b;
+} mgLink;
 
-typedef kvec_t(link_t) link_v;
+typedef kvec_t(mgLink) mgLinkVec;
 
 typedef struct mgLevel {
-    cpSpace* space;
-	link_v links;
+    struct cpSpace;
+    mgLinkVec links;
 } mgLevel;
 
-typedef struct {
-	struct cpBody;
-	link_v links;
-} mgRoom;
+mgLevel* mgLevelAlloc(void);
+mgLevel* mgLevelInit(mgLevel* level);
+mgLevel* mgLevelNew(void);
 
-mgLevel* mgLevelNew();
+void mgLelevDestroy(mgLevel* level);
 void mgLevelFree(mgLevel* level);
 
-void mgLevelAddRoom(mgLevel* level);
+void mgLevelCreateRandomRoom(mgLevel* level);
+void mgLevelLinkTwoRooms(mgLevel* level, mgRoom* a, mgRoom* b);
+void mgLevelLinkAllRooms(mgLevel* level);
+void mgLevelClearLinks(mgLevel* level);
 
 void mgLevelUpdate(mgLevel* level, float dt);
 void mgLevelRender(mgLevel* level);

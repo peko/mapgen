@@ -24,7 +24,7 @@ key(int key, int action) {
 
 void
 mouseClick(int button, int action,int mods){
-    mgLevelAddRoom(level);
+    mgLevelCreateRandomRoom(level);
 }
 
 int main(int argc, char* argv[]) {

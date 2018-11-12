@@ -12,7 +12,6 @@ add_definitions(-DNANOVG_GL2 -DNANOVG_GLEW)
 include_directories(${OPENGL_INCLUDE_DIR})
 include_directories(${GLEW_INCLUDE_DIRS})
 
-
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/src 
     ${CMAKE_CURRENT_SOURCE_DIR}/dep/nanovg/src
@@ -40,7 +39,6 @@ add_library(delaunay STATIC
 #    Clipper/clipper_c_test.c
 # )
 # target_link_libraries(clipper_c_test clipper)
-
  
 add_executable(mapgen
     src/mapgen.c
@@ -60,4 +58,11 @@ target_link_libraries(mapgen
     chipmunk
     clipper
 	delaunay
+)
+
+add_custom_target(
+    run
+    COMMAND mapgen
+    DEPENDS mapgen
+    WORKING_DIRECTORY ${CMAKE_PROJECT_DIR}
 )
