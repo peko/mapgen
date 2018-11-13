@@ -20,7 +20,7 @@ void mgLevelCreateRandomRoom(mgLevel* level);
 void mgLevelLinkTwoRooms(mgLevel* level, mgRoom* a, mgRoom* b);
 void mgLevelLinkAllRooms(mgLevel* level);
 void mgLevelClearLinks(mgLevel* level);
-
+void mgLevelSimulate(mgLevel* level);
 void mgLevelUpdate(mgLevel* level, float dt);
 void mgLevelRender(mgLevel* level);
 

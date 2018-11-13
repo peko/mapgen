@@ -56,13 +56,20 @@ mgLevelCreateRandomRoom(mgLevel* level) {
     mgRoomNew(level, 
         cpv(rand()%80*10, rand()%80*10), 
         cpv(rand()%10*10+40, rand()%10*10+40));
+    mgLevelSimulate(level);
     mgLevelLinkAllRooms(level);
 }
 
 void 
 mgLevelUpdate(mgLevel* level, float dt) {
+    // cpSpace* space = (cpSpace*) level;
+    // cpSpaceStep(space, 0.1);
+}
+
+void 
+mgLevelSimulate(mgLevel* level) {
     cpSpace* space = (cpSpace*) level;
-    cpSpaceStep(space, 0.1);
+    for(int i=0; i<10; i++) cpSpaceStep(space, 0.1);
 }
 
 void mgLevelClearLinks(mgLevel* level){
