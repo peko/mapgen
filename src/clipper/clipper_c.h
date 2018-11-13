@@ -1,10 +1,6 @@
 #pragma once
 
-#include <kvec.h>
-
-typedef struct {int64_t x, y;} mgClippPoint;
-typedef kvec_t(mgClippPoint) mgClippPath;
-typedef kvec_t(mgClippPath ) mgClippPaths;
+#include "primitives.h"
 
 #ifdef __cplusplus
 extern "C" {
