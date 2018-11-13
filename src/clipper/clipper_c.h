@@ -2,28 +2,32 @@
 
 #include <kvec.h>
 
-typedef struct {int64_t x, y;} kpoint_t;
-typedef kvec_t(kpoint_t) kpath_t;
-typedef kvec_t(kpath_t) kpaths_t;
+typedef struct {int64_t x, y;} mgClippPoint;
+typedef kvec_t(mgClippPoint) mgClippPath;
+typedef kvec_t(mgClippPath ) mgClippPaths;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-    void clipp_kpaths(
-       kpaths_t* subj,
-       kpaths_t* clip,
-       kpaths_t* result);
 
-    kpath_t* kpath_new();
-    void kpath_free(kpath_t* kpath);
-    void kpath_add_point(kpath_t* kpath, kpoint_t* kpoint);
-    void kpath_print(kpath_t* kpath);
+    void mgClippShapes(
+       mgClippPaths* subj,
+       mgClippPaths* clip,
+       mgClippPaths* result);
+
+    // Clip Path
+    mgClippPath* kpath_new();
+    void mgClippPathFree    (mgClippPath* paths);
+    void mgClippPathAddPoint(mgClippPath* paths, mgClippPoint* point);
+    void mgClippPathPrint   (mgClippPath* paths);
+
+    // Clip Paths
+    mgClippPaths* mgClippPathsNew();
+    mgClippPath*  mgClippPathsAddNewPath(mgClippPaths* paths);
+    void mgClippPathsFree   (mgClippPaths* paths);
+    void mgClippPathsAddPath(mgClippPaths* paths, mgClippPath* path);
+    void mgClippPathsPrint  (mgClippPaths* paths);
     
-    kpaths_t* kpaths_new();
-    void kpaths_free(kpaths_t* kpaths);
-    void kpaths_add_path(kpaths_t* kpaths, kpath_t* kpath);
-    kpath_t* kpaths_add_new_path(kpaths_t* kpaths);
-    void kpaths_print(kpaths_t* kpaths);
 #ifdef __cplusplus
 }
 #endif

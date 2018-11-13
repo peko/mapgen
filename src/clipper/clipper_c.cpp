@@ -8,104 +8,122 @@
 
 using namespace clipperlib;
 
-static void kpaths_to_paths(kpaths_t* kpaths, Paths& paths);
-static void paths_to_kpaths(Paths& paths, kpaths_t* kpaths);
+static void MgToPaths(mgClippPaths* kpaths, Paths& paths);
+static void PathsToMg (Paths& paths, mgClippPaths* kpaths);
 
-extern "C" void clipp_kpaths(
-    kpaths_t* ksubj,
-    kpaths_t* kclip,
-    kpaths_t* kresult) {
+extern "C" void 
+mgClippShapes(
+    mgClippPaths* subj,
+    mgClippPaths* clip,
+    mgClippPaths* result) {
 
-    ClipType clip_type = ctIntersection;
-    FillRule fill_rule = frNonZero;
-    Paths subj, clip, result;
+    ClipType clipType = ctIntersection;
+    FillRule fillRule = frNonZero;
+    Paths _subj, _clip, _result;
 
-    kpaths_to_paths(ksubj,   subj  );
-    kpaths_to_paths(kclip,   clip  );
-    kpaths_to_paths(kresult, result);
+    MgToPaths(subj,   _subj  );
+    MgToPaths(clip,   _clip  );
+    MgToPaths(result, _result);
     
     Clipper clipper;
-    clipper.AddPaths(subj, ptSubject);
-    clipper.AddPaths(clip, ptClip);
-    clipper.Execute(clip_type, result, fill_rule);
-    paths_to_kpaths(result, kresult);
+    clipper.AddPaths(_subj, ptSubject);
+    clipper.AddPaths(_clip, ptClip);
+    clipper.Execute(clipType, _result, fillRule);
+    PathsToMg(_result, result);
 }
 
-static void kpaths_to_paths(
-    kpaths_t* kpaths, 
-    Paths& paths) {
+static void 
+MgToPaths(
+    mgClippPaths* paths, 
+    Paths&        outPaths) {
 
-    paths.resize(kpaths->n);
+    outPaths.resize(paths->n);
     // iterate through paths
-    for(size_t i=0; i<kpaths->n; i++) {
+    for(size_t i=0; i<paths->n; i++) {
         // copy every path to vector
-        kpath_t* kpath = &kpaths->a[i];
-        paths[i].assign(
-            (Point64*) (kpath->a           ), 
-            (Point64*) (kpath->a + kpath->n));
+        mgClippPath* path = &paths->a[i];
+        outPaths[i].assign(
+            (Point64*) (paths->a           ), 
+            (Point64*) (paths->a + paths->n));
     }
 }
 
-static void paths_to_kpaths(Paths& paths, kpaths_t* kpaths) {
-    if(kpaths->n != 0 || kpaths->a !=0) kpaths_free(kpaths);
+static void 
+PathsToMg(
+    Paths&        paths, 
+    mgClippPaths* outPaths) {
+
+    if(outPaths->n != 0 || outPaths->a !=0) mgClippPathsFree(outPaths);
     for(size_t i=0; i<paths.size(); i++) {
-        Path& path = paths[i];
-        kpath_t* kpath = kpaths_add_new_path(kpaths);
-        kv_resize(kpoint_t, *kpath, path.size());
-        kpath->n = path.size();
-        memcpy(kpath->a, path.data(), sizeof(kpoint_t)*(kpath->n));
+        mgClippPath* _path = mgClippPathsAddNewPath(outPaths);
+        kv_resize(mgClippPoint, *_path, paths[i].size());
+        _path->n = paths[i].size();
+        memcpy(_path->a, paths[i].data(), sizeof(mgClippPoint)*(_path->n));
     }
 }
 
-// kpath - point collection
+// mgClippPath
 
-kpath_t* kpath_new() {
-    kpath_t* kpath = (kpath_t*) calloc(1, sizeof(kpath_t));
+mgClippPath*
+mgClippPathNew() {
+    mgClippPath* kpath = (mgClippPath*) calloc(1, sizeof(mgClippPath));
     return kpath;
 }
 
-void kpath_free(kpath_t* kpath) {
-    free(kpath->a);
-    *kpath = (kpath_t) {0,0,0};
+void 
+mgClippPathFree(mgClippPath* path) {
+    free(path->a);
+    *path = (mgClippPath) {0,0,0};
 }
 
-void kpath_add_point(kpath_t* kpath, kpoint_t* kpoint) {
-    kv_push(kpoint_t, *kpath, *kpoint);
+void
+mgClippPathAddPoint(
+    mgClippPath*       path, 
+    mgClippPoint* point) {
+    kv_push(mgClippPoint, *path, *point);
 }
 
-void kpath_print(kpath_t* kpath) {
+void 
+mgClippPathPrint(mgClippPath* kpath) {
     for(size_t i=0; i<kpath->n; i++) {
         printf("\t%d: {%" PRId64 ",%" PRId64 "}\n", i, kpath->a[i].x, kpath->a[i].y);
     }
 }
 
-// kpaths - path collection
+// mgClippPaths
 
-kpaths_t* kpaths_new() {
-    kpaths_t* kpaths = (kpaths_t*) calloc(1, sizeof(kpaths_t));
-    return kpaths;
+mgClippPaths* 
+mgClippPathsNew() {
+    mgClippPaths* paths = (mgClippPaths*) calloc(1, sizeof(mgClippPaths));
+    return paths;
 }
 
-void kpaths_free(kpaths_t* kpaths) {
-    for(size_t i=0; i<kpaths->n; i++) {
-        kpath_free(&kpaths->a[i]);
+void 
+mgClippPathFree(mgClippPaths* paths) {
+    for(size_t i=0; i<paths->n; i++) {
+        mgClippPathFree(&paths->a[i]);
     }
-    free(kpaths->a);
-    *kpaths = (kpaths_t) {0,0,0};
+    free(paths->a);
+    *paths = (mgClippPaths) {0,0,0};
 }
 
-void kpaths_add_path(kpaths_t* kpaths, kpath_t* kpath) {
-    kv_push(kpath_t, *kpaths, *kpath);
+void
+mgClippPathAdd_path(
+    mgClippPaths* paths, 
+    mgClippPath*      path) {
+    kv_push(mgClippPath, *paths, *path);
 }
 
-kpath_t* kpaths_add_new_path(kpaths_t* kpaths) {
-    kv_push(kpath_t, *kpaths, ((kpath_t){0,0,0}));
-    return &kpaths->a[kpaths->n-1];
+mgClippPath* 
+mgClippPathAddNewPath(mgClippPaths* paths) {
+    kv_push(mgClippPath, *paths, ((mgClippPath){0,0,0}));
+    return &paths->a[paths->n-1];
 }
 
-void kpaths_print(kpaths_t* kpaths) {
-    for(size_t i=0; i<kpaths->n; i++) {
+void
+mgClippPathPrint(mgClippPaths* paths) {
+    for(size_t i=0; i<paths->n; i++) {
         printf("path[%d]", i);
-        kpath_print(&kpaths->a[i]);
+        mgClippPathPrint(&paths->a[i]);
     }
 }
