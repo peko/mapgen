@@ -72,7 +72,7 @@ void mgLevelClearLinks(mgLevel* level){
     kv_destroy(level->links);
     level->links = (mgLinkVec){0}; 
     // clear links from bodies
-    cpArray* bodies = level->dynamicBodies;
+    cpArray* bodies = level->space.dynamicBodies;
     for(int i=0; i<bodies->num; i++){
         mgRoom* r = (mgRoom*)bodies->arr[i];
         mgRoomClearLinks(r); 
@@ -125,8 +125,8 @@ mgLevelDrawLinks(mgLevel* level) {
         mgLink* l = &level->links.a[i];
         mgRoom* a = l->a;
         mgRoom* b = l->b;
-        nvgMoveTo(vg, a->p.x, a->p.y);
-        nvgLineTo(vg, b->p.x, b->p.y);
+        nvgMoveTo(vg, a->body.p.x, a->body.p.y);
+        nvgLineTo(vg, b->body.p.x, b->body.p.y);
     }
     nvgStrokeColor(vg, nvgRGBf(0.2, 0.2, 0.2));
     nvgStrokeWidth(vg, 1.0);
@@ -140,3 +140,9 @@ mgLevelRender(mgLevel* level) {
     mgLevelDrawLinks(level);
 }
 
+void
+mgLevelClipp(mgLevel* level) {
+    // cleanup old clip
+    // mgClippPathsFree(level->clipped); 
+    // create new clip
+}

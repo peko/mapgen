@@ -8,7 +8,7 @@ typedef kvec_t(mgRoom*) mgRoomVec;
 
 typedef struct mgLevel mgLevel;
 typedef struct mgRoom {
-    struct cpBody;
+    cpBody    body;
     mgRoomVec links;
 } mgRoom;
 

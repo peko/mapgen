@@ -373,13 +373,13 @@ ColorForShape(cpShape *shape, cpDataPointer data) {
             // scramble the bits up using Robert Jenkins' 32 bit integer hash function
             val = (val+0x7ed55d16) + (val<<12);
             val = (val^0xc761c23c) ^ (val>>19);
-            val = (val+0x165667b1) + (val<<5);
-            val = (val+0xd3a2646c) ^ (val<<9);
-            val = (val+0xfd7046c5) + (val<<3);
+            val = (val+0x165667b1) + (val<< 5);
+            val = (val+0xd3a2646c) ^ (val<< 9);
+            val = (val+0xfd7046c5) + (val<< 3);
             val = (val^0xb55a4f09) ^ (val>>16);
             
-            float r = (float)((val>>0) & 0xFF);
-            float g = (float)((val>>8) & 0xFF);
+            float r = (float)((val>> 0) & 0xFF);
+            float g = (float)((val>> 8) & 0xFF);
             float b = (float)((val>>16) & 0xFF);
             
             float max = (float)cpfmax(cpfmax(r, g), b);

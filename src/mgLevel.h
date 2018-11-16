@@ -3,9 +3,8 @@
 #include "primitives.h"
 #include "clipper_c.h"
 
-
 typedef struct mgLevel {
-    struct cpSpace;
+    cpSpace space;
     mgLinkVec links;
     mgClippPaths clipped;
 } mgLevel;
