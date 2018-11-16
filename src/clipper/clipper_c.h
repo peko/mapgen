@@ -13,9 +13,9 @@ extern "C" {
 
     // Clip Path
     mgClippPath* kpath_new();
-    void mgClippPathFree    (mgClippPath* paths);
-    void mgClippPathAddPoint(mgClippPath* paths, mgClippPoint* point);
-    void mgClippPathPrint   (mgClippPath* paths);
+    void mgClippPathFree    (mgClippPath* path);
+    void mgClippPathAddPoint(mgClippPath* path, mgClippPoint* point);
+    void mgClippPathPrint   (mgClippPath* path);
 
     // Clip Paths
     mgClippPaths* mgClippPathsNew();

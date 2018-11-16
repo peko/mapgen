@@ -7,6 +7,7 @@
 typedef struct mgLevel {
     struct cpSpace;
     mgLinkVec links;
+    mgClippPaths clipped;
 } mgLevel;
 
 mgLevel* mgLevelAlloc(void);

@@ -78,7 +78,7 @@ mgClippPathFree(mgClippPath* path) {
 
 void
 mgClippPathAddPoint(
-    mgClippPath*       path, 
+    mgClippPath*  path, 
     mgClippPoint* point) {
     kv_push(mgClippPoint, *path, *point);
 }
@@ -108,7 +108,7 @@ mgClippPathFree(mgClippPaths* paths) {
 }
 
 void
-mgClippPathAdd_path(
+mgClippPathAddPath(
     mgClippPaths* paths, 
     mgClippPath*      path) {
     kv_push(mgClippPath, *paths, *path);

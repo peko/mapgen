@@ -14,8 +14,6 @@
 extern NVGcontext* vg;
 extern void spaceDraw(cpSpace* space);
 
-////////////////////////////////////////////////////////////////////////////////
-
 mgLevel*
 mgLevelAlloc(void) {
     return cpcalloc(1, sizeof(mgLevel)); 
@@ -46,10 +44,8 @@ mgLevelFree(mgLevel* level) {
     if(level) {
         mgLevelDestroy(level);
         cpfree(level);
-     }
+    }
 }
-
-////////////////////////////////////////////////////////////////////////////////
 
 void
 mgLevelCreateRandomRoom(mgLevel* level) {
@@ -84,7 +80,11 @@ void mgLevelClearLinks(mgLevel* level){
 }
 
 void
-mgLevelLinkTwoRooms(mgLevel* level, mgRoom* a, mgRoom* b) {
+mgLevelLinkTwoRooms(
+    mgLevel* level, 
+    mgRoom* a, 
+    mgRoom* b) {
+        
     mgLink link = {a, b};
     kv_push(mgLink, level->links, link);
     mgRoomLinkTogether(a, b);
@@ -101,14 +101,12 @@ mgLevelLinkAllRooms(mgLevel* level) {
             cpBody* a = bodies->arr[i];
             cpShapeFilter filter = {1, CP_ALL_CATEGORIES, CP_ALL_CATEGORIES};
             a->shapeList[0].filter = filter;
-            {
-                // shape point disntace gradient    
-                cpPointQueryInfo out = {0};
-                cpSpacePointQueryNearest(space, a->p, 1000.0, filter, &out);
-                if(out.shape != NULL) {
-                    cpBody* b = out.shape->body;
-                    mgLevelLinkTwoRooms(level, (mgRoom*)a, (mgRoom*)b);
-                }
+            // shape, point, disntace, gradient    
+            cpPointQueryInfo out = {0};
+            cpSpacePointQueryNearest(space, a->p, 1000.0, filter, &out);
+            if(out.shape != NULL) {
+                cpBody* b = out.shape->body;
+                mgLevelLinkTwoRooms(level, (mgRoom*)a, (mgRoom*)b);
             }
             a->shapeList[0].filter = (cpShapeFilter){CP_NO_GROUP, CP_ALL_CATEGORIES, CP_ALL_CATEGORIES};
         }

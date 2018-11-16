@@ -39,10 +39,10 @@ mgRoomDestroy(mgRoom* room) {
 
 void 
 mgRoomFree(mgRoom* room) {
-   if(room) {
-       mgRoomDestroy(room);
-       cpfree(room);
-   }
+    if(room) {
+        mgRoomDestroy(room);
+        cpfree(room);
+    }
 }
 
 void
