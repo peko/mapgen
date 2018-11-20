@@ -3,19 +3,22 @@
 #include <string.h>
 #include <inttypes.h>
 
+#include "../mgLevel.h"
 #include "clipper.h"
 #include "clipper_c.h"
 
+#define CLIPPING_SCALE 10000
+
 using namespace clipperlib;
 
-static void MgToPaths(mgClippPaths* kpaths, Paths& paths);
-static void PathsToMg (Paths& paths, mgClippPaths* kpaths);
+static void MgToPaths(mgClipPoly* poly, Paths& paths);
+static void PathsToMg (Paths& paths, mgClipPoly* poly);
 
 extern "C" void 
-mgClippShapes(
-    mgClippPaths* subj,
-    mgClippPaths* clip,
-    mgClippPaths* result) {
+mgClipShapes(
+    mgClipPoly* subj,
+    mgClipPoly* clip,
+    mgClipPoly* result) {
 
     ClipType clipType = ctIntersection;
     FillRule fillRule = frNonZero;
@@ -34,96 +37,128 @@ mgClippShapes(
 
 static void 
 MgToPaths(
-    mgClippPaths* paths, 
-    Paths&        outPaths) {
+    mgClipPoly* poly, 
+    Paths& paths) {
 
-    outPaths.resize(paths->n);
-    // iterate through paths
-    for(size_t i=0; i<paths->n; i++) {
+    paths.resize(poly->n);
+    // iterate through poly
+    for(size_t i=0; i<poly->n; i++) {
         // copy every path to vector
-        mgClippPath* path = &paths->a[i];
-        outPaths[i].assign(
-            (Point64*) (paths->a           ), 
-            (Point64*) (paths->a + paths->n));
+        mgClipPath* path = &poly->a[i];
+        paths[i].assign(
+            (Point64*) (poly->a           ), 
+            (Point64*) (poly->a + poly->n));
     }
 }
 
 static void 
 PathsToMg(
-    Paths&        paths, 
-    mgClippPaths* outPaths) {
+    Paths& paths, 
+    mgClipPoly* poly) {
 
-    if(outPaths->n != 0 || outPaths->a !=0) mgClippPathsFree(outPaths);
+    if(poly->n != 0 || poly->a !=0) mgClipPolyFree(poly);
     for(size_t i=0; i<paths.size(); i++) {
-        mgClippPath* _path = mgClippPathsAddNewPath(outPaths);
-        kv_resize(mgClippPoint, *_path, paths[i].size());
-        _path->n = paths[i].size();
-        memcpy(_path->a, paths[i].data(), sizeof(mgClippPoint)*(_path->n));
+        mgClipPath* _path = mgClipPolyAddNewPath(poly);
+        VecResize(mgClipPoint, *_path, paths[i].size());
+        poly->m = poly->n = paths[i].size();
+        memcpy(poly->a, paths[i].data(), sizeof(mgClipPoint)*(poly->n));
     }
 }
 
-// mgClippPath
+// mgClipPath
 
-mgClippPath*
-mgClippPathNew() {
-    mgClippPath* kpath = (mgClippPath*) calloc(1, sizeof(mgClippPath));
-    return kpath;
-}
-
-void 
-mgClippPathFree(mgClippPath* path) {
-    free(path->a);
-    *path = (mgClippPath) {0,0,0};
+mgClipPath*
+mgClipPathNew() {
+    mgClipPath* path = (mgClipPath*) calloc(1, sizeof(mgClipPath));
+    return path;
 }
 
 void
-mgClippPathAddPoint(
-    mgClippPath*  path, 
-    mgClippPoint* point) {
-    kv_push(mgClippPoint, *path, *point);
+mgClipPathFree(mgClipPath* path) {
+    if(path->a == NULL) return;
+    free(path->a);
+    // cleanup pointer
+    *path = (mgClipPath) {0, 0, NULL};
+}
+
+void
+mgClipPathAddPoint(
+    mgClipPath*  path, 
+    mgClipPoint* point) {
+    VecPush(mgClipPoint, *path, *point);
 }
 
 void 
-mgClippPathPrint(mgClippPath* kpath) {
-    for(size_t i=0; i<kpath->n; i++) {
-        printf("\t%d: {%" PRId64 ",%" PRId64 "}\n", i, kpath->a[i].x, kpath->a[i].y);
+mgClipPathPrint(mgClipPath* path) {
+    for(size_t i=0; i<path->n; i++) {
+        printf("\t%d: {%" PRId64 ",%" PRId64 "}\n", i, path->a[i].x, path->a[i].y);
     }
 }
 
-// mgClippPaths
+// mgClipPoly
 
-mgClippPaths* 
-mgClippPathsNew() {
-    mgClippPaths* paths = (mgClippPaths*) calloc(1, sizeof(mgClippPaths));
+mgClipPoly* 
+mgClipPolyNew() {
+    mgClipPoly* poly = (mgClipPoly*) calloc(1, sizeof(mgClipPoly));
+    return poly;
+}
+
+// Free poly
+void 
+mgClipPolyFree(mgClipPoly* poly) {
+    if(poly->a == NULL) return;
+    // Iterateh through all paths and free
+    for(size_t i=0; i<poly->n; i++) {
+        mgClipPathFree(&poly->a[i]);
+    }
+    // free vector of paths
+    free(poly->a);
+    // cleanup vector
+    *poly = (mgClipPoly) {0, 0, NULL};
+}
+
+// Add to poly new existing path
+void
+mgClipPolyAddPath(
+    mgClipPoly* poly, 
+    mgClipPath* path) {
+    VecPush(mgClipPath, *poly, *path);
+}
+
+// Create new path in poly and return it
+mgClipPath* 
+mgClipPolyAddNewPath(mgClipPoly* poly) {
+    // insert to poly new empty path
+    VecPush(mgClipPath, *poly, ((mgClipPath){0,0,0}));
+    // return last path
+    return &poly->a[poly->n-1];
+}
+
+void
+mgClipPathPrint(mgClipPoly* poly) {
+    for(size_t i=0; i<poly->n; i++) {
+        printf("path[%d]", i);
+        mgClipPathPrint(&poly->a[i]);
+    }
+}
+
+static Paths
+levelToPoly(mgLevel* level) {
+    cpSpace* space = (cpSpace*)level;
+    cpArray* bodies = space->dynamicBodies;
+    Paths paths;
+    paths.clear(); 
+    for(int i=0; i<bodies->num; i++){
+        cpBody* b = (cpBody*)bodies->arr[i];
+        cpShape* s = &b->shapeList[0];        
+        int count = cpPolyShapeGetCount(s);
+        Path p;
+        for(int i=0; i<count; i++) {
+            cpVect v = cpBodyLocalToWorld(s->body, cpPolyShapeGetVert(s, i));
+            p.push_back(Point64(v.x*CLIPPING_SCALE, v.y*CLIPPING_SCALE));
+        }
+        paths.push_back(p);
+    }
     return paths;
 }
 
-void 
-mgClippPathFree(mgClippPaths* paths) {
-    for(size_t i=0; i<paths->n; i++) {
-        mgClippPathFree(&paths->a[i]);
-    }
-    free(paths->a);
-    *paths = (mgClippPaths) {0,0,0};
-}
-
-void
-mgClippPathAddPath(
-    mgClippPaths* paths, 
-    mgClippPath*      path) {
-    kv_push(mgClippPath, *paths, *path);
-}
-
-mgClippPath* 
-mgClippPathAddNewPath(mgClippPaths* paths) {
-    kv_push(mgClippPath, *paths, ((mgClippPath){0,0,0}));
-    return &paths->a[paths->n-1];
-}
-
-void
-mgClippPathPrint(mgClippPaths* paths) {
-    for(size_t i=0; i<paths->n; i++) {
-        printf("path[%d]", i);
-        mgClippPathPrint(&paths->a[i]);
-    }
-}

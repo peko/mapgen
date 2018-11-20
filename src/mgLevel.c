@@ -69,8 +69,8 @@ mgLevelSimulate(mgLevel* level) {
 }
 
 void mgLevelClearLinks(mgLevel* level){
-    kv_destroy(level->links);
-    level->links = (mgLinkVec){0}; 
+    VecDestroy(level->links);
+    level->links = (mgLinkV){0}; 
     // clear links from bodies
     cpArray* bodies = level->space.dynamicBodies;
     for(int i=0; i<bodies->num; i++){
@@ -86,7 +86,7 @@ mgLevelLinkTwoRooms(
     mgRoom* b) {
         
     mgLink link = {a, b};
-    kv_push(mgLink, level->links, link);
+    VecPush(mgLink, level->links, link);
     mgRoomLinkTogether(a, b);
 }
 
