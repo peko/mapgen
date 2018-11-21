@@ -5,8 +5,8 @@
 
 typedef struct mgLevel {
     cpSpace space;
-    mgLinkVec links;
-    mgClippPaths clipped;
+    mgLinkV links;
+    mgClipPoly clipPoly;
 } mgLevel;
 
 mgLevel* mgLevelAlloc(void);

@@ -48,13 +48,13 @@ mgRoomFree(mgRoom* room) {
 void
 mgRoomLinkTogether(mgRoom* a, mgRoom* b) {
    if(a && b) {
-      kv_push(mgRoom*, a->links, b);
-      kv_push(mgRoom*, b->links, a);
+      VecPush(mgRoom*, a->links, b);
+      VecPush(mgRoom*, b->links, a);
    }
 }
 
 void
 mgRoomClearLinks(mgRoom* room) {
-    kv_destroy(room->links);
-    room->links = (mgRoomVec){0};
+    VecDestroy(room->links);
+    room->links = (mgRoomV){0};
 }

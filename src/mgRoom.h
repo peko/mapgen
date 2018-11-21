@@ -4,12 +4,12 @@
 
 typedef struct mgRoom mgRoom;
 
-typedef kvec_t(mgRoom*) mgRoomVec;
+typedef Vec(mgRoom*) mgRoomV;
 
 typedef struct mgLevel mgLevel;
 typedef struct mgRoom {
-    cpBody    body;
-    mgRoomVec links;
+    cpBody  body;
+    mgRoomV links;
 } mgRoom;
 
 mgRoom* mgRoomAlloc(void);

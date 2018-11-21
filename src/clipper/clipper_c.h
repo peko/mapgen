@@ -1,29 +1,36 @@
 #pragma once
 
-#include "primitives.h"
+#include "../Vec.h"
+
+// Path - vector of points
+// Poly - vector of paths
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-    void mgClippShapes(
-       mgClippPaths* subj,
-       mgClippPaths* clip,
-       mgClippPaths* result);
+    typedef struct mgClipPoint {int64_t x, y;} mgClipPoint;
+    typedef Vec(mgClipPoint) mgClipPath;
+    typedef Vec(mgClipPath ) mgClipPoly;
+
+    void mgClipShapes(
+       mgClipPoly* subj,
+       mgClipPoly* clip,
+       mgClipPoly* result);
 
     // Clip Path
-    mgClippPath* kpath_new();
-    void mgClippPathFree    (mgClippPath* path);
-    void mgClippPathAddPoint(mgClippPath* path, mgClippPoint* point);
-    void mgClippPathPrint   (mgClippPath* path);
+    mgClipPath* kpath_new();
+    void mgClipPathFree    (mgClipPath* path);
+    void mgClipPathAddPoint(mgClipPath* path, mgClipPoint* point);
+    void mgClipPathPrint   (mgClipPath* path);
 
     // Clip Paths
-    mgClippPaths* mgClippPathsNew();
-    mgClippPath*  mgClippPathsAddNewPath(mgClippPaths* paths);
-    void mgClippPathsFree   (mgClippPaths* paths);
-    void mgClippPathsAddPath(mgClippPaths* paths, mgClippPath* path);
-    void mgClippPathsPrint  (mgClippPaths* paths);
-    
+    mgClipPoly* mgClipPolyNew();
+    mgClipPath*  mgClipPolyAddNewPath(mgClipPoly* paths);
+    void mgClipPolyFree   (mgClipPoly* paths);
+    void mgClipPolyAddPath(mgClipPoly* paths, mgClipPath* path);
+    void mgClipPolyPrint  (mgClipPoly* paths);
+
 #ifdef __cplusplus
 }
 #endif

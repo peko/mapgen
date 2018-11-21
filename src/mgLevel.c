@@ -52,8 +52,6 @@ mgLevelCreateRandomRoom(mgLevel* level) {
     mgRoomNew(level, 
         cpv(rand()%80*10, rand()%80*10), 
         cpv(rand()%10*10+40, rand()%10*10+40));
-    mgLevelSimulate(level);
-    mgLevelLinkAllRooms(level);
 }
 
 void 
@@ -69,8 +67,8 @@ mgLevelSimulate(mgLevel* level) {
 }
 
 void mgLevelClearLinks(mgLevel* level){
-    kv_destroy(level->links);
-    level->links = (mgLinkVec){0}; 
+    VecDestroy(level->links);
+    level->links = (mgLinkV){0}; 
     // clear links from bodies
     cpArray* bodies = level->space.dynamicBodies;
     for(int i=0; i<bodies->num; i++){
@@ -84,9 +82,9 @@ mgLevelLinkTwoRooms(
     mgLevel* level, 
     mgRoom* a, 
     mgRoom* b) {
-        
+     
     mgLink link = {a, b};
-    kv_push(mgLink, level->links, link);
+    VecPush(mgLink, level->links, link);
     mgRoomLinkTogether(a, b);
 }
 
@@ -115,7 +113,12 @@ mgLevelLinkAllRooms(mgLevel* level) {
 
 void 
 mgLevelKey(mgLevel* level, int key, int action) {
-    if(key==32 && action == 1) mgLevelCreateRandomRoom(level);
+    if(key==32 && action == 1) {
+        mgLevelCreateRandomRoom(level);
+        mgLevelSimulate(level);
+        mgLevelLinkAllRooms(level);
+        //mgLevelClipp(level);
+    }
 }
 
 void
@@ -141,7 +144,7 @@ mgLevelRender(mgLevel* level) {
 }
 
 void
-mgLevelClipp(mgLevel* level) {
+mgLevelClip(mgLevel* level) {
     // cleanup old clip
     // mgClippPathsFree(level->clipped);
     // create new clip
