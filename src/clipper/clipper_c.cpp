@@ -12,7 +12,7 @@
 using namespace clipperlib;
 
 static void MgToPaths(mgClipPoly* poly, Paths& paths);
-static void PathsToMg (Paths& paths, mgClipPoly* poly);
+static void PathsToMg(Paths& paths, mgClipPoly* poly);
 
 extern "C" void 
 mgClipShapes(
@@ -142,12 +142,17 @@ mgClipPathPrint(mgClipPoly* poly) {
     }
 }
 
+void
+mgClipLevel(mgLevel* level) {
+
+}
+
 static Paths
 levelToPoly(mgLevel* level) {
     cpSpace* space = (cpSpace*)level;
     cpArray* bodies = space->dynamicBodies;
     Paths paths;
-    paths.clear(); 
+    paths.clear();
     for(int i=0; i<bodies->num; i++){
         cpBody* b = (cpBody*)bodies->arr[i];
         cpShape* s = &b->shapeList[0];        
@@ -159,6 +164,10 @@ levelToPoly(mgLevel* level) {
         }
         paths.push_back(p);
     }
+    
+    // all links 
+    for(int i=0; i<level->links.n; i++){}
+    
     return paths;
 }
 
