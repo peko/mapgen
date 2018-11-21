@@ -1,0 +1,12 @@
+﻿---
+AlignEscapedNewlinesLeft: 'true'
+AlignTrailingComments: 'true'
+IndentWidth: '4'
+PointerAlignment: Left
+SpaceBeforeAssignmentOperators: 'true'
+SpaceBeforeParens: Never
+SpacesInParentheses: 'false'
+TabWidth: '4'
+UseTab: Never
+
+...
