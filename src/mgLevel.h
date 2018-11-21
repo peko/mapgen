@@ -23,5 +23,6 @@ void mgLevelClearLinks(mgLevel* level);
 void mgLevelSimulate(mgLevel* level);
 void mgLevelUpdate(mgLevel* level, float dt);
 void mgLevelRender(mgLevel* level);
+void mgLevelClip(mgLevel* level);
 
 void mgLevelKey(mgLevel* level, int key, int action);

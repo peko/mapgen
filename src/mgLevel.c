@@ -117,7 +117,7 @@ mgLevelKey(mgLevel* level, int key, int action) {
         mgLevelCreateRandomRoom(level);
         mgLevelSimulate(level);
         mgLevelLinkAllRooms(level);
-        //mgLevelClipp(level);
+        mgLevelClip(level);
     }
 }
 
@@ -146,6 +146,6 @@ mgLevelRender(mgLevel* level) {
 void
 mgLevelClip(mgLevel* level) {
     // cleanup old clip
-    // mgClippPathsFree(level->clipped); 
+    mgClippPathsFree(level->cliped);
     // create new clip
 }
