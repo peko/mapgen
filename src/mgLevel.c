@@ -143,6 +143,6 @@ mgLevelRender(mgLevel* level) {
 void
 mgLevelClipp(mgLevel* level) {
     // cleanup old clip
-    // mgClippPathsFree(level->clipped); 
+    // mgClippPathsFree(level->clipped);
     // create new clip
 }
